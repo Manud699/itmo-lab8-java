@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
 group = "client"
@@ -10,12 +11,18 @@ repositories {
 }
 
 dependencies {
-
     implementation(project(":common"))
     testImplementation(platform("org.junit:junit-bom:6.0.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
+
+javafx {
+    version = "22"
+    modules("javafx.controls", "javafx.fxml")
+}
+
 
 tasks.test {
     useJUnitPlatform()
@@ -27,11 +34,10 @@ tasks.withType<Jar> {
     }
 
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_22
+    targetCompatibility = JavaVersion.VERSION_22
 }

@@ -2,16 +2,17 @@ package client;
 
 import client.builders.UserBuild;
 import client.cli.*;
-import client.commands.*;
+//import client.commands.*;
 import client.builders.CoordinatesBuilder;
 import client.builders.OrganizationBuilder;
 import client.builders.WorkerMainBuilder;
+import client.controllers.RunnerLoginController;
+import client.controllers.RunnerMainController;
 import client.network.ArgumentNetworkParse;
 import client.network.NetworkClient;
 import client.repository.*;
-import client.usercommands.LoggingUserCommand;
-import client.usercommands.RegistrateUserCommand;
-
+import common.repository.WorkerRepository;
+import javafx.stage.Stage;
 
 
 public class SystemBootstrapper {
@@ -23,29 +24,36 @@ public class SystemBootstrapper {
     private final String[] argumentsFromMain;
     private WorkerMainBuilder workerBuilder;
     private NetworkClient networkClient;
-    private CommandUserRegistry commandUserRegistry;
-    private UserBuild userBuild;
     private UserRegistry userRegistry;
     private ClientSession clientSession;
+    private RunnerLoginController runnerLoginController;
+    private RunnerMainController runnerMainController;
+
+    private final Stage primaryStage;
 
 
-    
-    public SystemBootstrapper(String[] argumentsFromMain){
+    public SystemBootstrapper(String[] argumentsFromMain, Stage primaryStage){
         this.argumentsFromMain = argumentsFromMain;
+        this.primaryStage = primaryStage;
     }
 
 
-
-    public ApplicationRunner buildApplicationRunner() {
+    public Runner buildRunner() {
         initInfrastructure();
         initNetworkClient();
         initRepositories();
         initBuildersMainObject();
         initProxyRepository();
         initCommands();
-        initCommandsUser();
-        return new ApplicationRunner(console, inputProvider, commandRegistry, scriptExecutionStack, commandUserRegistry);
+        initRunnerControllers();
+        return new Runner(runnerLoginController,runnerMainController);
     }
+
+
+
+
+
+
 
 
 
@@ -69,7 +77,6 @@ public class SystemBootstrapper {
 
     private void initRepositories() {
         this.userRegistry = new UserRegistry(networkClient);
-        this.commandUserRegistry = new CommandUserRegistry(console);
         this.commandRegistry = new CommandRegistry(console);
         this.scriptExecutionStack = new ScriptExecutionStack(inputProvider, console);
         this.clientSession = new ClientSession();
@@ -82,32 +89,49 @@ public class SystemBootstrapper {
         this.workerBuilder = new WorkerMainBuilder(inputProvider, console);
         workerBuilder.setCoordinatesBuild(coordinatesBuild);
         workerBuilder.setOrganizationBuilder(organizationBuild);
-        this.userBuild = new UserBuild(inputProvider, console);
     }
 
 
     private void initCommands() {
-        commandRegistry.addCommand(new ExitCommand());
-        commandRegistry.addCommand(new AddCommand(proxyWorkerRepository, console, workerBuilder));
-        commandRegistry.addCommand(new ShowCommand(proxyWorkerRepository, console));
-        commandRegistry.addCommand(new HelpCommand(commandRegistry, console));
-        commandRegistry.addCommand(new HistoryCommand(commandRegistry, console));
-        commandRegistry.addCommand(new ClearCommand(proxyWorkerRepository, console));
-        commandRegistry.addCommand(new UpdateByIdCommand(proxyWorkerRepository, console, workerBuilder));
-        commandRegistry.addCommand(new RemoveByIdCommand(proxyWorkerRepository, console));
-        commandRegistry.addCommand(new ExecuteScriptCommand(console, scriptExecutionStack));
-        commandRegistry.addCommand(new HeadCommand(proxyWorkerRepository, console));
-        commandRegistry.addCommand(new InfoCommand(proxyWorkerRepository, console));
-        commandRegistry.addCommand(new PrintFieldDescendingSalaryCommand(proxyWorkerRepository, console));
-        commandRegistry.addCommand(new RemoveAllByPosition(proxyWorkerRepository, console));
-        commandRegistry.addCommand(new RemoveHeadCommand(proxyWorkerRepository, console));
-        commandRegistry.addCommand(new SumOfSalaryCommand(proxyWorkerRepository, console));
+//        commandRegistry.addCommand(new ExitCommand());
+//        commandRegistry.addCommand(new AddCommand(proxyWorkerRepository, console, workerBuilder));
+//        commandRegistry.addCommand(new ShowCommand(proxyWorkerRepository, console));
+//        commandRegistry.addCommand(new HelpCommand(commandRegistry, console));
+//        commandRegistry.addCommand(new HistoryCommand(commandRegistry, console));
+//        commandRegistry.addCommand(new ClearCommand(proxyWorkerRepository, console));
+//        commandRegistry.addCommand(new UpdateByIdCommand(proxyWorkerRepository, console, workerBuilder));
+//        commandRegistry.addCommand(new RemoveByIdCommand(proxyWorkerRepository, console));
+//        commandRegistry.addCommand(new ExecuteScriptCommand(console, scriptExecutionStack));
+//        commandRegistry.addCommand(new HeadCommand(proxyWorkerRepository, console));
+//        commandRegistry.addCommand(new InfoCommand(proxyWorkerRepository, console));
+//        commandRegistry.addCommand(new PrintFieldDescendingSalaryCommand(proxyWorkerRepository, console));
+//        commandRegistry.addCommand(new RemoveAllByPosition(proxyWorkerRepository, console));
+//        commandRegistry.addCommand(new RemoveHeadCommand(proxyWorkerRepository, console));
+//        commandRegistry.addCommand(new SumOfSalaryCommand(proxyWorkerRepository, console));
 
     }
 
 
-    private void initCommandsUser(){
-        commandUserRegistry.addCommand("login", new LoggingUserCommand(userBuild, userRegistry, console, clientSession));
-        commandUserRegistry.addCommand("register", new RegistrateUserCommand(userBuild,userRegistry,console, clientSession));
+    public UserRegistry getUserRegistry() {
+        return userRegistry;
+    }
+
+
+    public ClientSession getClientSession() {
+        return clientSession;
+    }
+
+
+    public WorkerRepository getProxyWorkerRepository() {
+        return proxyWorkerRepository;
+    }
+
+
+    private void initRunnerControllers() {
+        this.runnerLoginController = new RunnerLoginController(primaryStage);
+        this.runnerMainController = new RunnerMainController(primaryStage);
+        runnerMainController.setBootstrapper(this);
+        runnerLoginController.setSystemBootstrapper(this);
+        runnerLoginController.setRunnerMainController(runnerMainController);
     }
 }

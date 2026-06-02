@@ -9,15 +9,15 @@ import java.io.Serializable;
  */
 public class Organization implements Serializable {
 
-    private final String fullName; //Длина строки не должна быть больше 694, Поле не может быть null
-    private final float annualTurnover; //Значение поля должно быть больше 0
-    private final int employeesCount; //Значение поля должно быть больше 0
+    private String fullName; //Длина строки не должна быть больше 694, Поле не может быть null
+    private float annualTurnover; //Значение поля должно быть больше 0
+    private int employeesCount; //Значение поля должно быть больше 0
 
 
     public Organization(String fullName, float anuualTurnover, int employeesCount) {
-        this.fullName = fullName; 
-        this.annualTurnover = anuualTurnover; 
-        this.employeesCount = employeesCount; 
+        setFullName(fullName);
+        setAnnualTurnover(anuualTurnover);
+        setEmployeesCount(employeesCount);
     } 
 
 
@@ -45,4 +45,25 @@ public class Organization implements Serializable {
                 '}';
     }
 
+    public void setFullName(String fullName){
+        if(fullName.length() > 694) {
+            throw new IllegalArgumentException("error.val.orgAnnual");
+        }
+        this.fullName = fullName;
+    }
+
+
+    public void setAnnualTurnover(float annualTurnover){
+        if(annualTurnover <= 0 ){
+            throw new IllegalArgumentException("error.val.orgAnnual");
+        }
+        this.annualTurnover = annualTurnover;
+    }
+
+    public void setEmployeesCount(int employeesCount){
+        if(employeesCount <= 0){
+            throw new IllegalArgumentException("error.val.orgEmployeesCount");
+        }
+        this.employeesCount = employeesCount;
+    }
 }

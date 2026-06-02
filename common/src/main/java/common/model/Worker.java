@@ -8,6 +8,7 @@ import java.time.ZonedDateTime;
  */
 public class Worker implements Comparable<Worker>, Serializable {
 
+    private static final long serialVersionUID = 1L;
 
     private long id;
     private String name; // Поле не может быть null, Строка не может быть пустой
@@ -20,8 +21,9 @@ public class Worker implements Comparable<Worker>, Serializable {
     private String creatorName;
 
 
+
     public Worker(){}
-    
+
 
     public Worker(long id, String name, Coordinates coordinates, ZonedDateTime creationDate, long salary, Position position, Status status, Organization organization) {
         this.id = id; 
@@ -91,6 +93,9 @@ public class Worker implements Comparable<Worker>, Serializable {
 
 
     public void setName(String name){
+        if(name == null || name.isEmpty()){
+            throw new IllegalArgumentException("error.val.name");
+        }
         this.name = name;
     }
 
@@ -107,18 +112,27 @@ public class Worker implements Comparable<Worker>, Serializable {
 
 
     public void setSalary(long salary){
+        if(salary <= 0){
+            throw new IllegalArgumentException("error.val.salary");
+        }
         this.salary = salary;
     }
 
 
 
     public void setPosition(Position position){
+        if(position == null){
+            throw new IllegalArgumentException("error.val.position");
+        }
         this.position =position;
     }
 
 
 
     public void setStatus(Status status){
+        if(status == null){
+            throw new IllegalArgumentException("error.val.status");
+        }
         this.status = status;
     }
 

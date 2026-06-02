@@ -16,6 +16,4 @@ public interface Console {
     void ps1();
 
     void ps2();
-
-
 }

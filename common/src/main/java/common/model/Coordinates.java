@@ -8,19 +8,17 @@ import java.io.Serializable;
  */
 public class Coordinates implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private float x;
     private Double y;
 
-    
-    /**
-     * Constructor for the Coordinates class.
-     * @param x 
-     * @param y
-     */
+
     public Coordinates(float x, Double y) {
-        this.x = x; 
-        this.y = y;
+        setX(x);
+        setY(y);
     } 
+
 
     public float getX() {
         return x; 
@@ -32,4 +30,18 @@ public class Coordinates implements Serializable {
     } 
 
 
+    public void setX(float x){
+        if(x < -497){
+            throw new IllegalArgumentException("error.val.xCoord");
+        }
+        this.x = x;
+    }
+
+
+    public void setY(double y){
+        if(y < -764){
+            throw new IllegalArgumentException("error.val.yCoord");
+        }
+        this.y =y;
+    }
 }
