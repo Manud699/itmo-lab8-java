@@ -78,7 +78,7 @@ public class DataBaseWorker implements WorkerRepository {
                          ResultSet resultSet = preparedStatement.executeQuery()) {
 
                         while (resultSet.next()) {
-                            Worker worker = new Worker();
+
                             Coordinates coordinates = new Coordinates(
                                     resultSet.getFloat("coordinate_x"),
                                     resultSet.getDouble("coordinate_y")
@@ -100,15 +100,12 @@ public class DataBaseWorker implements WorkerRepository {
                             String position = resultSet.getString("position");
                             String status = resultSet.getString("status");
                             String creator = resultSet.getString("name_user");
+                            var worker = new Worker(id, name, coordinates, zonedDateTime,
+                                                salary,
+                                                Position.valueOf(position.toUpperCase()),
+                                                Status.valueOf(status.toUpperCase()),
+                                                organization);
 
-                            worker.setId(id);
-                            worker.setName(name);
-                            worker.setCoordinates(coordinates);
-                            worker.setCreationDate(zonedDateTime);
-                            worker.setSalary(salary);
-                            worker.setPosition(Position.valueOf(position.toUpperCase()));
-                            worker.setStatus(Status.valueOf(status.toUpperCase()));
-                            worker.setOrganization(organization);
                             worker.setCreatorName(creator);
                             localWorkerRepository.add(worker);
                         }

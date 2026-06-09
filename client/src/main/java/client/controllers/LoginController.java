@@ -4,20 +4,42 @@ import client.SystemBootstrapper;
 import common.network.Result;
 import common.network.User;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.function.Function;
 
 public class LoginController {
 
     @FXML private TextField userName;
     @FXML private PasswordField passwordField;
+    @FXML private ComboBox<String> languageCombox;
+    @FXML private ResourceBundle resources;
+    @FXML private Button loginButton;
+    @FXML private Button registerButton;
+    @FXML private Label passwordLabel;
+    @FXML private Label nameLabel;
 
     private SystemBootstrapper systemBootstrapper;
     private RunnerMainController runnerMainController;
+
+    private Map<String, String> mapLanguages = new HashMap<>();
+    private Map<String, String> mapLocation = new HashMap<>();
+
+
+    public void initialize() {
+        mapLanguages.put("Ruso", "ru");
+        mapLanguages.put("Español (Colombia)", "es");
+        mapLocation.put("ru", "RU");
+        mapLocation.put("es", "CO");
+        setBoxComboOptions();
+    }
+
+
 
     @FXML
     private void handleLoginAction(){
@@ -34,6 +56,44 @@ public class LoginController {
                 "Registro exitoso."
         );
     }
+
+
+    private void changeLanguage(String language){
+        String languageChoosed = mapLanguages.get(language);
+        String locationLanguage = mapLocation.get(languageChoosed);
+        var locale = new Locale(languageChoosed, locationLanguage);
+        this.resources = ResourceBundle.getBundle("i18n/messages", locale);
+        updateTextInterface();
+    }
+
+
+
+    private void setBoxComboOptions(){
+
+        languageCombox.getItems().addAll("Español (Colombia)", "Ruso");
+        languageCombox.setValue("Español (Colombia)");
+
+        languageCombox.setOnAction(action ->
+        {
+            String idioma = languageCombox.getValue();
+            changeLanguage(idioma);
+        });
+    }
+
+
+    private void updateTextInterface(){
+        if(resources==null) return;
+        loginButton.setText(resources.getString("button.login"));
+        registerButton.setText(resources.getString("button.register"));
+        passwordLabel.setText(resources.getString("label.password"));
+        nameLabel.setText(resources.getString("label.name"));
+
+    }
+
+
+
+
+
 
     public void setRunnerMainController(RunnerMainController runnerMainController) {
         this.runnerMainController = runnerMainController;

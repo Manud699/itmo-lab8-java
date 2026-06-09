@@ -2,7 +2,6 @@ package server.multithread;
 
 import common.network.Response;
 import server.lifecycle.Shutdownable;
-
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.util.concurrent.ExecutorService;
@@ -16,13 +15,14 @@ public final class ResponseProvider implements Shutdownable {
     private final DatagramSocket datagramSocket;
 
     public ResponseProvider(DatagramSocket datagramSocket) {
-        this.executorService = Executors.newFixedThreadPool(10, getThreadFactory());
+        this.executorService = Executors.newFixedThreadPool(20, getThreadFactory());
         this.datagramSocket = datagramSocket;
     }
 
 
+
     public void sendResponse(Response response, SocketAddress socketAddress){
-        executorService.submit(new SendResponse(response, socketAddress,datagramSocket));
+        executorService.submit(new SendResponse(response,socketAddress,datagramSocket));
     }
 
 

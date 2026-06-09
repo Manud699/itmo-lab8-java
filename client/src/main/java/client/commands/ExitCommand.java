@@ -1,8 +1,5 @@
 package client.commands;
 
-import client.cli.Console;
-
-
 public class ExitCommand extends AbstractCommand  {
 
 

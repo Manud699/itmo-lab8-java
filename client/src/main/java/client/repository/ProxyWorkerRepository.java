@@ -45,6 +45,8 @@ public class ProxyWorkerRepository implements WorkerRepository {
     }
 
 
+    //add some metod to reques data from collection 
+
 
     @Override
     public Result<Void> clear(){

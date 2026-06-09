@@ -1,4 +1,6 @@
-package server.storagedb;
+package server.network;
+
+import server.storagedb.DatabaseCredentials;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

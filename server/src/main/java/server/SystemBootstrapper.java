@@ -1,17 +1,15 @@
 package server;
 
 import server.lifecycle.ShutdownCoordinator;
+import server.multithread.DataUpdateSender;
 import server.network.ServerAddress;
-import server.repository.DataBaseWorker;
-import server.repository.UserRepository;
+import server.repository.*;
 import server.commands.*;
 import server.network.NetworkServer;
-import server.repository.CommandRegistry;
-import server.repository.LocalWorkerRepository;
 import server.storagedb.DatabaseConnection;
 import server.storagedb.DatabaseCredentials;
 import common.repository.WorkerRepository;
-import server.storagedb.HandlerEnvironment;
+import server.network.HandlerEnvironment;
 import java.util.logging.Logger;
 
 
@@ -24,6 +22,7 @@ public class SystemBootstrapper {
     private final String [] argms;
     private UserRepository userRepository;
     private LocalWorkerRepository localWorkerRepository;
+    private CurrentClient currentClient;
 
     
     public SystemBootstrapper(String[] argms){
@@ -36,6 +35,7 @@ public class SystemBootstrapper {
         initRepository();
         initCommands();
         initNetworking();
+        initUpdateDataSender();
         initLoadData();
         initShutdownHook();
         return new RunnerAppServer(networkServer);
@@ -78,8 +78,10 @@ public class SystemBootstrapper {
 
 
     private void initNetworking(){
+        this.currentClient = new CurrentClient();
         final int port = ServerAddress.parsePort(argms);
         this.networkServer = new NetworkServer(port, commandRegistry);
+        networkServer.setCurrentClient(currentClient);
     }
 
 
@@ -92,5 +94,10 @@ public class SystemBootstrapper {
     private void initShutdownHook(){
         var shutdownHook= new ShutdownCoordinator(databaseConnection, networkServer);
         shutdownHook.pickShutDownHook();
+    }
+
+    public void initUpdateDataSender(){
+        var dataUpdateSender = new DataUpdateSender(networkServer.getResponseProvider(),currentClient);
+        localWorkerRepository.setDataUpdateSender(dataUpdateSender);
     }
 }

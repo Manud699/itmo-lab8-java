@@ -1,8 +1,11 @@
 package client.controllers;
 import client.SystemBootstrapper;
+import client.network.NotificationListener;
 import common.model.Position;
 import common.model.Status;
 import common.model.Worker;
+import common.network.Result;
+import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,10 +13,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-
-
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -22,7 +23,8 @@ import java.util.*;
 public class MainController {
 
     private SystemBootstrapper bootstrapper;
-
+    private RunnerLoginController runnerLoginController;
+    private NotificationListener notificationListener;
 
     @FXML
     private TextArea consoleOutput;
@@ -84,6 +86,20 @@ public class MainController {
     @FXML
     private Button clearButton;
 
+    @FXML
+    private Button updateButton;
+
+    @FXML
+    private Button exitButton;
+
+    @FXML
+    private Button signOutButton;
+
+    @FXML
+    private Tab workersTab;
+
+    @FXML
+    private Button removeHeadButton;
 
     private Map<String, String> mapLanguages = new HashMap<>();
     private Map<String, String> mapLocation = new HashMap<>();
@@ -96,6 +112,7 @@ public class MainController {
         mapLocation.put("es", "CO");
 
         setBoxComboOptions();
+        setupContextMenu();
 
         idColumn.setCellValueFactory(cellValue ->
                                         new SimpleLongProperty(cellValue
@@ -181,33 +198,29 @@ public class MainController {
 
 
 
-
-
-
-    public void setBoxComboOptions(){
+    private void setBoxComboOptions(){
 
         languageCombox.getItems().addAll("Español (Colombia)", "Ruso");
         languageCombox.setValue("Español (Colombia)");
 
         languageCombox.setOnAction(action ->
-                        {
-                            String idioma = languageCombox.getValue();
-                            changeLanguage(idioma);
-                        });
+                                {
+                                    String idioma = languageCombox.getValue();
+                                    changeLanguage(idioma);
+                                });
     }
 
 
 
-
-        private void changeLanguage(String language){
-            String languageChoosed = mapLanguages.get(language);
-            String locationLanguage = mapLocation.get(languageChoosed);
-            var locale = new Locale(languageChoosed, locationLanguage);
-            this.resources = ResourceBundle.getBundle("i18n/messages", locale);
-            updateTextInterface();
-        }
-
-
+    private void changeLanguage(String language){
+        String languageChoosed = mapLanguages.get(language);
+        String locationLanguage = mapLocation.get(languageChoosed);
+        var locale = new Locale(languageChoosed, locationLanguage);
+        this.resources = ResourceBundle.getBundle("i18n/messages", locale);
+        updateTextInterface();
+        closeSidePanel();
+        workersTable.refresh();
+    }
 
 
 
@@ -216,10 +229,10 @@ public class MainController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/worker_form_view.fxml"));
             loader.setResources(this.resources);
-            VBox vBox = loader.load();
+            GridPane gridPane = loader.load();
             WorkerFormController formWorker = loader.getController();
             formWorker.setMainController(this);
-            mainBorderPane.setRight(vBox);
+            mainBorderPane.setRight(gridPane);
         } catch (Exception e){
             printToConsole(e.getMessage());
             e.printStackTrace();
@@ -229,17 +242,44 @@ public class MainController {
 
 
     @FXML
-    public void handleShowAction(){
+    public void handleUpdateAction() {
+        try {
+            var worker = workersTable.getSelectionModel().getSelectedItem();
 
+            if (worker == null) {
+                printToConsole("Seleccione un trabajador de la tabla antes de actualizar.");
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/worker_form_view.fxml"));
+            loader.setResources(resources);
+            GridPane gridPane = loader.load();
+            WorkerFormController formController = loader.getController();
+            formController.setMainController(this);
+
+            formController.setWorkerForUpdate(worker);
+
+            mainBorderPane.setRight(gridPane);
+        } catch (Exception e) {
+            printToConsole(e.getMessage());
+        }
     }
 
 
-
-
-    public void printToConsole(String message){
-            String timeStamp = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-            consoleOutput.appendText("[" + timeStamp + "] " + message + "\n");
-    }
+        @FXML
+        public void handleRemoveHeadAction() {
+            try {
+                Result<Worker> resultWorker = bootstrapper.getProxyWorkerRepository().removeHead();
+                if(!resultWorker.isSuccess()){
+                    printToConsole(resultWorker.getErrorMessage());
+                    return;
+                }
+                showRemovedHead(resultWorker.getValue());
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Que esta sucediendo? ");
+            }
+        }
 
 
 
@@ -247,6 +287,128 @@ public class MainController {
     public void handleClearAction(){
         bootstrapper.getProxyWorkerRepository().clear();
         showMessage("Operarion exitosa",Color.GREEN);
+    }
+
+
+    @FXML
+    public void handleExitAction(){
+        try {
+            Platform.exit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            System.exit(0);
+        }
+    }
+
+
+    @FXML
+    public void handleSignOutAction(){
+        try {
+            bootstrapper.getClientSession().removeUser();
+            notificationListener.stopListening();
+
+            if(runnerLoginController != null)
+                runnerLoginController.loadLoginView();
+
+        } catch (Exception e) {
+            System.err.println("No fue posible cerrar la cesion");
+        }
+    }
+
+
+    private void showRemovedHead(Worker removedWorker) {
+        if (removedWorker==null) {
+            printToConsole("console.removeHead.empty");
+            return;
+        }
+
+        String format = resources.getString("console.removeHead.success");
+        String logToprint = String.format(
+                format,
+                removedWorker.getId(),
+                removedWorker.getName(),
+                removedWorker.getPosition(),
+                removedWorker.getSalary(),
+                removedWorker.getOrganization().getFullName()
+        );
+        printToConsole(logToprint);
+    }
+
+
+
+
+    private void setupContextMenu(){
+        workersTable.setRowFactory(
+                tv -> {
+                    TableRow<Worker> tableRow = new TableRow<>();
+
+                    ContextMenu contextMenu = new ContextMenu();
+
+                    MenuItem infoItem = new MenuItem(resources.getString("menu.info"));
+                    MenuItem updateItem = new MenuItem(resources.getString("menu.update"));
+
+                    infoItem.setOnAction( event -> {
+                        var worker = tableRow.getItem();
+                        showWorkerDetailsDialog(worker);
+                         });
+
+                    updateItem.setOnAction(event -> {
+                        workersTable.getSelectionModel().select(tableRow.getItem());
+                        handleUpdateAction();
+                    });
+
+                    contextMenu.getItems().addAll(infoItem, updateItem);
+
+                    tableRow.contextMenuProperty().bind(
+                            javafx.beans.binding.Bindings.when(tableRow.emptyProperty())
+                                    .then((ContextMenu) null)
+                                    .otherwise(contextMenu)
+                    );
+                    return tableRow;
+                });
+    }
+
+
+
+    private void showWorkerDetailsDialog(Worker worker) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(resources.getString("dialog.info.title"));
+        alert.setHeaderText(resources.getString("dialog.info.header") + worker.getName());
+
+        String formatPlantilla = resources.getString("dialog.info.details");
+
+        String details = String.format(
+                formatPlantilla,
+                worker.getId(),
+                worker.getCreatorName(),
+                worker.getCoordinates().getX(),
+                worker.getCoordinates().getY(),
+                worker.getSalary(),
+                worker.getPosition(),
+                worker.getStatus(),
+                worker.getOrganization().getFullName(),
+                worker.getOrganization().getAnnualTurnover(),
+                worker.getOrganization().getEmployeesCount(),
+                worker.getCreationDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+        );
+        alert.setContentText(details);
+        DialogPane dialogPane = alert.getDialogPane();
+        try {
+            String css = getClass().getResource("/css/dark-theme.css").toExternalForm();
+            dialogPane.getStylesheets().add(css);
+            dialogPane.getStyleClass().add("form-panel");
+        } catch (Exception e) {
+            System.out.println("No se pudo cargar el CSS para el diálogo.");
+        }
+        alert.showAndWait();
+    }
+
+
+
+    public void printToConsole(String message){
+        String timeStamp = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        consoleOutput.appendText("[" + timeStamp + "] " + message + "\n");
     }
 
 
@@ -269,7 +431,13 @@ public class MainController {
         mainBorderPane.setRight(null);
     }
 
+    public void setNotificationListener(NotificationListener notificationListener){
+        this.notificationListener = notificationListener;
+    }
 
+    public void setRunnerLoginController(RunnerLoginController runnerLoginController){
+        this.runnerLoginController= runnerLoginController;
+    }
 
     public void setBootstrapper(SystemBootstrapper systemBootstrapper){
         this.bootstrapper = systemBootstrapper;
@@ -283,6 +451,13 @@ public class MainController {
 
         addButton.setText(resources.getString("button.add"));
         clearButton.setText(resources.getString("button.clear"));
+        updateButton.setText(resources.getString("button.update"));
+        exitButton.setText(resources.getString("button.exit"));
+        signOutButton.setText(resources.getString("button.signOut"));
+        removeHeadButton.setText(getResources().getString("button.removeHead"));
+
+
+        workersTab.setText(resources.getString("tab.workers"));
 
         idColumn.setText(resources.getString("table.id"));
         nameColumn.setText(resources.getString("table.name"));
@@ -300,6 +475,7 @@ public class MainController {
     }
 
 
+
     public SystemBootstrapper gerSystemBootstrapper(){
         if(bootstrapper != null) {
             return  bootstrapper;
@@ -308,11 +484,10 @@ public class MainController {
     }
 
 
+
     public ResourceBundle getResources(){
         return resources;
     }
-
-
 }
 
 

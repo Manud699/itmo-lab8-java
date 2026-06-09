@@ -1,6 +1,5 @@
 package client;
 
-import client.builders.UserBuild;
 import client.cli.*;
 //import client.commands.*;
 import client.builders.CoordinatesBuilder;
@@ -8,6 +7,7 @@ import client.builders.OrganizationBuilder;
 import client.builders.WorkerMainBuilder;
 import client.controllers.RunnerLoginController;
 import client.controllers.RunnerMainController;
+import client.network.AddressNetwork;
 import client.network.ArgumentNetworkParse;
 import client.network.NetworkClient;
 import client.repository.*;
@@ -18,9 +18,7 @@ import javafx.stage.Stage;
 public class SystemBootstrapper {
     private InputProvider inputProvider;
     private Console console;
-    private CommandRegistry commandRegistry;
     private ProxyWorkerRepository proxyWorkerRepository;
-    private ScriptExecutionStack scriptExecutionStack;
     private final String[] argumentsFromMain;
     private WorkerMainBuilder workerBuilder;
     private NetworkClient networkClient;
@@ -28,6 +26,7 @@ public class SystemBootstrapper {
     private ClientSession clientSession;
     private RunnerLoginController runnerLoginController;
     private RunnerMainController runnerMainController;
+    private AddressNetwork addressNetwork;
 
     private final Stage primaryStage;
 
@@ -46,13 +45,8 @@ public class SystemBootstrapper {
         initProxyRepository();
         initCommands();
         initRunnerControllers();
-        return new Runner(runnerLoginController,runnerMainController);
+        return new Runner(runnerLoginController);
     }
-
-
-
-
-
 
 
 
@@ -65,8 +59,8 @@ public class SystemBootstrapper {
 
 
     private void initNetworkClient(){
-        var networkArguments = ArgumentNetworkParse.parseNetworkArguments(argumentsFromMain, console);
-        this.networkClient = new NetworkClient(networkArguments.host(), networkArguments.port());
+        this.addressNetwork = ArgumentNetworkParse.parseNetworkArguments(argumentsFromMain, console);
+        this.networkClient = new NetworkClient(addressNetwork.host(), addressNetwork.port());
     }
 
 
@@ -77,8 +71,6 @@ public class SystemBootstrapper {
 
     private void initRepositories() {
         this.userRegistry = new UserRegistry(networkClient);
-        this.commandRegistry = new CommandRegistry(console);
-        this.scriptExecutionStack = new ScriptExecutionStack(inputProvider, console);
         this.clientSession = new ClientSession();
     }
 
@@ -127,6 +119,11 @@ public class SystemBootstrapper {
     }
 
 
+    public NetworkClient getNetworkClient(){
+        return networkClient;
+    }
+
+
     private void initRunnerControllers() {
         this.runnerLoginController = new RunnerLoginController(primaryStage);
         this.runnerMainController = new RunnerMainController(primaryStage);
@@ -134,4 +131,9 @@ public class SystemBootstrapper {
         runnerLoginController.setSystemBootstrapper(this);
         runnerLoginController.setRunnerMainController(runnerMainController);
     }
+
+    public AddressNetwork getAddressNetwork()   {
+        return addressNetwork;
+    }
+
 }

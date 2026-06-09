@@ -14,4 +14,8 @@ public class ClientSession {
         return user;
     }
 
+    public void removeUser(){
+        user = null;
+    }
+
 }

@@ -7,14 +7,14 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="319.0" prefWidth="262.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.LoginController">
+<AnchorPane prefHeight="351.0" prefWidth="418.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.LoginController">
    <children>
-      <TextField fx:id="userName" layoutX="122.0" layoutY="79.0" prefHeight="26.0" prefWidth="156.0" />
-      <PasswordField fx:id="passwordField" layoutX="122.0" layoutY="121.0" prefHeight="26.0" prefWidth="156.0" />
-      <Button layoutX="122.0" layoutY="160.0" mnemonicParsing="false" onAction="#handleRegisterAction" prefHeight="26.0" prefWidth="71.0" text="register" />
-      <Button layoutX="203.0" layoutY="160.0" mnemonicParsing="false" onAction="#handleLoginAction" prefHeight="26.0" prefWidth="71.0" text="login" />
-      <Label fx:id="messageLabel" layoutX="125.0" layoutY="214.0" prefHeight="26.0" prefWidth="156.0" />
-      <Label fx:id="messageLabel1" layoutX="22.0" layoutY="276.0" prefHeight="26.0" prefWidth="384.0" />
-      <ComboBox layoutX="297.0" layoutY="14.0" prefHeight="26.0" prefWidth="94.0" promptText="idioma" />
+      <TextField fx:id="userName" layoutX="131.0" layoutY="65.0" prefHeight="26.0" prefWidth="156.0" />
+      <PasswordField fx:id="passwordField" layoutX="131.0" layoutY="115.0" prefHeight="26.0" prefWidth="156.0" />
+      <Button fx:id="registerButton" layoutX="146.0" layoutY="191.0" mnemonicParsing="false" onAction="#handleRegisterAction" prefHeight="26.0" prefWidth="125.0" text="register" />
+      <Button fx:id="loginButton" layoutX="167.0" layoutY="241.0" mnemonicParsing="false" onAction="#handleLoginAction" prefHeight="26.0" prefWidth="82.0" text="login" />
+      <ComboBox fx:id="languageCombox" layoutX="294.0" layoutY="294.0" prefHeight="26.0" prefWidth="110.0" promptText="idioma" />
+      <Label fx:id="nameLabel" layoutX="131.0" layoutY="91.0" prefHeight="24.0" prefWidth="156.0" text="name*" />
+      <Label fx:id="passwordLabel" layoutX="131.0" layoutY="141.0" prefHeight="26.0" prefWidth="156.0" text="password*" />
    </children>
 </AnchorPane>

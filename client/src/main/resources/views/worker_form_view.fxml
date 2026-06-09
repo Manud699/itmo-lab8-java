@@ -5,74 +5,52 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 
-<VBox fx:id="mainBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="439.0" prefWidth="285.0" spacing="10.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.WorkerFormController">
+<GridPane fx:id="gridPaneMain" hgap="20.0" prefHeight="252.0" prefWidth="400.0" vgap="15.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.WorkerFormController">
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="427.800048828125" minWidth="10.0" prefWidth="427.800048828125" />
+      <ColumnConstraints hgrow="ALWAYS" maxWidth="573.3999786376953" minWidth="10.0" prefWidth="483.00001525878906" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+   </rowConstraints>
+   <children>
+      <Label fx:id="addName" alignment="CENTER" prefHeight="26.0" text="%form.name" />
+      <TextField fx:id="nameField" alignment="TOP_LEFT" prefHeight="26.0" prefWidth="5000.0" GridPane.columnIndex="1" />
+      <Label fx:id="addX" prefHeight="26.0" text="%form.xCoord" GridPane.rowIndex="1" />
+      <TextField prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="xCoordinateField" />
+      <Label fx:id="addY" prefHeight="26.0" text="%form.yCoord" GridPane.rowIndex="2" />
+      <TextField fx:id="yCoordinateField" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <Label fx:id="addSalary" prefHeight="27.0" text="%form.salary" GridPane.rowIndex="3" />
+      <TextField fx:id="salaryField" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+      <Label fx:id="addPosition" prefHeight="26.0" text="%form.position" GridPane.rowIndex="4" />
+      <ComboBox fx:id="comboBoxPosition" prefHeight="26.0" prefWidth="197.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+      <Label fx:id="addStatus" prefHeight="26.0" text="%form.status" GridPane.rowIndex="5" />
+      <ComboBox fx:id="comboBoxStatus" prefHeight="26.0" prefWidth="197.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+      <Label fx:id="addNameOrg" prefHeight="27.0" text="%form.orgName" GridPane.rowIndex="6" />
+      <TextField fx:id="nameOrganizationField" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+      <Label fx:id="addOrgAnnual" prefHeight="28.0" text="%form.orgTourn" GridPane.rowIndex="7" />
+      <TextField fx:id="orgAnnualTurnoverField" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+      <Label fx:id="addEmployees" prefHeight="26.0" text="%form.employeesCounter" GridPane.rowIndex="8" />
+      <TextField fx:id="employeesCountField" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+      <Button mnemonicParsing="false" onAction="#handleSaveAction" prefHeight="26.0" text="%form.save" GridPane.rowIndex="11" />
+      <Button mnemonicParsing="false" onAction="#handleCancelAction" prefHeight="26.0" text="%form.cancel" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+   </children>
    <padding>
       <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
    </padding>
-   <children>
-      <Label fx:id="newWorker" prefHeight="18.0" prefWidth="73.0" text="New worker " />
-      <HBox spacing="15.0">
-         <children>
-            <Label fx:id="addName" prefHeight="26.0" prefWidth="62.0" text="name " />
-            <TextField fx:id="nameField" prefHeight="26.0" prefWidth="200.0" />
-         </children>
-      </HBox>
-      <HBox spacing="15.0">
-         <children>
-            <Label fx:id="addX" prefHeight="26.0" prefWidth="62.0" text="coord x" />
-            <TextField prefHeight="26.0" prefWidth="200.0" fx:id="xCoordinateField" />
-         </children>
-      </HBox>
-      <HBox spacing="15.0">
-         <children>
-            <Label fx:id="addY" prefHeight="26.0" prefWidth="62.0" text="coord y" />
-            <TextField fx:id="yCoordinateField" prefHeight="26.0" prefWidth="200.0" />
-         </children>
-      </HBox>
-      <HBox spacing="15.0">
-         <children>
-            <Label fx:id="addSalary" prefHeight="27.0" prefWidth="62.0" text="salary" />
-            <TextField fx:id="salaryField" prefHeight="26.0" prefWidth="200.0" />
-         </children>
-      </HBox>
-      <HBox spacing="15.0">
-         <children>
-            <Label fx:id="addPosition" prefHeight="26.0" prefWidth="62.0" text="position" />
-            <ComboBox fx:id="comboBoxPosition" prefHeight="26.0" prefWidth="197.0" />
-         </children>
-      </HBox>
-      <HBox spacing="15.0">
-         <children>
-            <Label fx:id="addStatus" prefHeight="26.0" prefWidth="62.0" text="status " />
-            <ComboBox fx:id="comboBoxStatus" prefHeight="26.0" prefWidth="197.0" />
-         </children>
-      </HBox>
-      <HBox spacing="15.0">
-         <children>
-            <Label fx:id="addNameOrg" prefHeight="27.0" prefWidth="62.0" text="org. name" />
-            <TextField fx:id="nameOrganizationField" prefHeight="26.0" prefWidth="200.0" />
-         </children>
-      </HBox>
-      <HBox spacing="15.0">
-         <children>
-            <Label fx:id="addOrgAnnual" prefHeight="28.0" prefWidth="62.0" text="org. tourn" />
-            <TextField fx:id="orgAnnualTurnoverField" prefHeight="26.0" prefWidth="200.0" />
-         </children>
-      </HBox>
-      <HBox spacing="15.0">
-         <children>
-            <Label fx:id="addEmployees" prefHeight="26.0" prefWidth="62.0" text=" em. counter " />
-            <TextField fx:id="employeesCountField" prefHeight="26.0" prefWidth="200.0" />
-         </children>
-      </HBox>
-      <HBox spacing="40.0">
-         <children>
-            <Button mnemonicParsing="false" onAction="#handleSaveAction" prefHeight="26.0" prefWidth="100.0" text="save" />
-            <Button mnemonicParsing="false" onAction="#handleCancelAction" prefHeight="26.0" prefWidth="100.0" text="cancel" />
-         </children>
-      </HBox>
-   </children>
-</VBox>
+</GridPane>

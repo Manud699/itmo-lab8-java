@@ -22,17 +22,15 @@ public class Worker implements Comparable<Worker>, Serializable {
 
 
 
-    public Worker(){}
-
 
     public Worker(long id, String name, Coordinates coordinates, ZonedDateTime creationDate, long salary, Position position, Status status, Organization organization) {
-        this.id = id; 
-        this.name = name;
+        this.id = id;
+        setName(name);
         this.coordinates = coordinates;
         this.creationDate = creationDate;  
-        this.salary = salary; 
-        this.position = position;
-        this.status = status; 
+        setSalary(salary);
+        setPosition(position);
+        setStatus(status);
         this.organization = organization;
     } 
 

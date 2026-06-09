@@ -3,17 +3,24 @@ package server.repository;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import common.model.Position;
 import common.model.Worker;
+import common.network.Response;
 import common.network.Result;
 import common.repository.WorkerRepository;
+import server.multithread.DataUpdateSender;
 import server.multithread.UserContext;
 
 
 public class LocalWorkerRepository implements WorkerRepository {
+
+    private static final Logger loger = Logger.getLogger(LocalWorkerRepository.class.getName());
+
     private final Deque<Worker> workers;
     private final ZonedDateTime creationDate;
+    private DataUpdateSender dataUpdateSender;
 
 
     public LocalWorkerRepository() {
@@ -25,6 +32,7 @@ public class LocalWorkerRepository implements WorkerRepository {
     @Override
     public synchronized Result<Boolean> add(Worker worker) {
         boolean isAdded = workers.add(worker);
+            refreshDataClient();
             return Result.success(isAdded);
     }
 
@@ -47,6 +55,7 @@ public class LocalWorkerRepository implements WorkerRepository {
         oldWorker.setStatus(workerUpdated.getStatus());
         oldWorker.setOrganization(workerUpdated.getOrganization());
 
+        refreshDataClient();
         return Result.success();
     }
 
@@ -83,6 +92,7 @@ public class LocalWorkerRepository implements WorkerRepository {
     @Override
     public synchronized Result<Void> clear() {
         workers.removeIf((worker -> worker.getCreatorName().equals(UserContext.get().name())));
+        refreshDataClient();
         return Result.success();
     }
 
@@ -91,6 +101,7 @@ public class LocalWorkerRepository implements WorkerRepository {
     @Override
     public synchronized Result<Boolean> removeById(long id) {
         boolean isSusses = workers.removeIf(x -> x.getId() == id);
+        refreshDataClient();
         return Result.success(isSusses);
     }
 
@@ -127,6 +138,7 @@ public class LocalWorkerRepository implements WorkerRepository {
         if(firstworker == null)
             return Result.success(null);
         workers.remove(firstworker);
+        refreshDataClient();
         return Result.success(firstworker);
     }
 
@@ -136,6 +148,7 @@ public class LocalWorkerRepository implements WorkerRepository {
         int initSize = workers.size();
         workers.removeIf(worker -> worker.getPosition() == position && Objects.equals(worker.getCreatorName(), UserContext.get().name()));
         int removed = initSize - workers.size();
+        refreshDataClient();
         return Result.success(removed);
     }
 
@@ -163,6 +176,23 @@ public class LocalWorkerRepository implements WorkerRepository {
     public Result<Void> load(){
         throw new UnsupportedOperationException("This method is not supported by this class.");
     }
+
+
+
+    public void setDataUpdateSender(DataUpdateSender dataUpdateSender){
+        if(dataUpdateSender != null){
+            this.dataUpdateSender = dataUpdateSender;
+            return;
+        }
+        loger.severe("No ha recibido DataUpdateSender. No sera posible hacer refresh en el futuro al Client");
+    }
+
+
+    public void refreshDataClient(){
+        var response = new Response(Result.success("UPDATE_SIGNAL"));
+        dataUpdateSender.send(response);
+    }
+
 }
 
 

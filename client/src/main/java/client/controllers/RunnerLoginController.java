@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class RunnerLoginController {
 
@@ -22,16 +23,28 @@ public class RunnerLoginController {
             Parent root = loader.load();
             Scene loginScene = new Scene(root);
 
-            LoginController controller = loader.getController();
-            controller.setSystemBootstrapper(systemBootstrapper);
+            String css = getClass().getResource("/css/dark-theme.css").toExternalForm();
+            loginScene.getStylesheets().add(css);
 
-            // ¡EL PUENTE! Le pasamos el controlador de la ventana principal
+            if(!primaryStage.isShowing())
+                primaryStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+
+            primaryStage.setMaximized(false);
+
+
+
+            LoginController controller = loader.getController();
+            controller.initialize();
+            controller.setSystemBootstrapper(systemBootstrapper);
+            runnerMainController.setRunnerLogin(this);
             controller.setRunnerMainController(runnerMainController);
 
-            primaryStage.setTitle("ITMO Lab 8 - Autenticación");
+            primaryStage.setTitle("ITMO Lab 8");
             primaryStage.setScene(loginScene);
             primaryStage.setResizable(false);
             primaryStage.show();
+
+            primaryStage.centerOnScreen();
 
         } catch (Exception e) {
             System.err.println("Error, no se pudo cargar la vista de login.");
@@ -39,9 +52,6 @@ public class RunnerLoginController {
         }
     }
 
-    public void setPrimaryStage(Stage stage){
-        this.primaryStage = stage;
-    }
 
     public void setSystemBootstrapper(SystemBootstrapper systemBootstrapper){
         this.systemBootstrapper = systemBootstrapper;

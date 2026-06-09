@@ -10,5 +10,7 @@ module client {
 
     opens client.controllers to javafx.fxml;
     exports client.controllers;
+    exports client.network;
+    opens client.network to javafx.fxml;
 
 }
