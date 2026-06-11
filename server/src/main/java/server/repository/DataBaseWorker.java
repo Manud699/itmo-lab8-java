@@ -200,7 +200,7 @@ public class DataBaseWorker implements WorkerRepository {
                             localWorkerRepository.updateWorkerById(workerUpdated);
                             return Result.success();
                         } else {
-                            return Result.failure("Could not update. Worker does not exist or does not belong to you.");
+                            return Result.failure("error.db.permission_denied");
                         }
                     }
                 });
@@ -223,8 +223,9 @@ public class DataBaseWorker implements WorkerRepository {
                         if (rowDeleted > 0) {
                             localWorkerRepository.removeById(id);
                             return Result.success(true);
+                        } else {
+                            return Result.failure("error.db.permission_denied");
                         }
-                        return Result.success(false);
                     }
                 });
         }
@@ -314,7 +315,7 @@ public class DataBaseWorker implements WorkerRepository {
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "SQL Error", e);
-            return Result.failure("Database task failed. Please try again later.");
+            return Result.failure("error.db.server_error");
 
         } finally {
             if (connection != null) {

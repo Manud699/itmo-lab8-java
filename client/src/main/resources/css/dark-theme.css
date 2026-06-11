@@ -313,3 +313,77 @@
     -fx-font-family: "Courier New", monospace;
     -fx-font-size: 14px;
 }
+
+/* =========================================
+   ESTILO PARA EL MENUBUTTON DESPLEGABLE
+   ========================================= */
+
+/* Hacemos que el MenuButton absorba toda la magia de tu clase btn-cyber */
+.menu-button.btn-cyber {
+    -fx-background-color: rgba(0, 0, 0, 0.01);
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-text-fill: #00f3ff;
+    -fx-font-family: "Courier New", monospace;
+    -fx-font-weight: 900;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+    -fx-padding: 8 15 8 15;
+}
+
+/* El texto dentro del MenuButton (JavaFX lo maneja con un label interno) */
+.menu-button.btn-cyber > .label {
+    -fx-text-fill: #00f3ff;
+}
+
+/* Efecto hover: Igual que tus botones normales */
+.menu-button.btn-cyber:hover,
+.menu-button.btn-cyber:showing { /* :showing es cuando el menú está abierto */
+    -fx-background-color: #00f3ff;
+    -fx-effect: dropshadow(gaussian, #00f3ff, 2.5, 0.6, 0, 0);
+}
+
+.menu-button.btn-cyber:hover > .label,
+.menu-button.btn-cyber:showing > .label {
+    -fx-text-fill: #000000;
+}
+
+/* 🌟 TRUCO MAGICO: Ocultar la flechita gris fea que viene por defecto */
+.menu-button.btn-cyber > .arrow-button {
+    -fx-padding: 0;
+}
+.menu-button.btn-cyber > .arrow-button > .arrow {
+    -fx-shape: null; /* Destruye el icono de la flecha */
+    -fx-padding: 0;
+}
+
+/* =========================================
+   ERRORES EN LÍNEA (VALIDACIÓN)
+   ========================================= */
+
+
+
+/* El borde del campo cuando tiene un error */
+.text-field-error, .combo-box-error {
+    -fx-border-color: #ff003c !important; /* Fuerza el color rojo/magenta */
+    -fx-effect: dropshadow(gaussian, #ff003c, 8, 0, 0, 0); /* Brillo de error */
+}
+
+/* =========================================
+   VALIDACIÓN DE ERRORES EN LÍNEA
+   ========================================= */
+
+/* Texto de advertencia debajo del campo */
+.error-label {
+    -fx-text-fill: #ff00ff; /* Magenta neón */
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-min-height: 15px; /* Evita que el formulario "salte" cuando aparece el texto */
+}
+
+/* El brillo y color del campo cuando falla */
+.input-error {
+    -fx-border-color: #ff00ff !important;
+    -fx-border-width: 0 0 2 0 !important;
+    -fx-effect: dropshadow(gaussian, #ff00ff, 8, 0, 0, 0);
+}

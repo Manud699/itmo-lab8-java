@@ -62,7 +62,7 @@ public class LoginController {
         String languageChoosed = mapLanguages.get(language);
         String locationLanguage = mapLocation.get(languageChoosed);
         var locale = new Locale(languageChoosed, locationLanguage);
-        this.resources = ResourceBundle.getBundle("i18n/messages", locale);
+        this.resources = ResourceBundle.getBundle("i18n.Messages", locale);
         updateTextInterface();
     }
 

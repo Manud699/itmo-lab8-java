@@ -1,6 +1,7 @@
 package client.controllers;
 
 import common.model.*;
+import common.network.Result;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -11,6 +12,7 @@ public class WorkerFormController {
 
     public WorkerFormController(){
         this.dictionaryErrors = new HashMap<>(16);
+        this.dictionaryLabels = new HashMap<>(16);
     }
 
     private MainController mainController;
@@ -53,12 +55,20 @@ public class WorkerFormController {
     @FXML
     private Label addEmployees;
 
-    @FXML
-    private Button save;
-    @FXML
-    private Button cancel;
+    @FXML private Label errorName;
+    @FXML private Label errorX;
+    @FXML private Label errorY;
+    @FXML private Label errorSalary;
+    @FXML private Label errorPosition;
+    @FXML private Label errorStatus;
+    @FXML private Label errorOrgName;
+    @FXML private Label errorOrgAnnual;
+    @FXML private Label errorOrgEmployees;
+
 
     HashMap <String, Node> dictionaryErrors;
+    private HashMap<String, Label> dictionaryLabels;
+
 
     protected final String ESTILO_ERROR = "-fx-border-color: red; -fx-border-width: 2px; -fx-border-radius: 3px;";
 
@@ -83,7 +93,8 @@ public class WorkerFormController {
 
 
     protected void clearErrorStyles() {
-        dictionaryErrors.values().forEach(node -> node.setStyle(""));
+        dictionaryErrors.values().forEach(node -> node.getStyleClass().remove("input-error"));
+        dictionaryLabels.values().forEach(label -> label.setText(""));
     }
 
 
@@ -103,57 +114,70 @@ public class WorkerFormController {
 
 
 
-    public void handleSaveAction(){
+    @FXML
+    public void handleSaveAction() {
         clearErrorStyles();
+
         try {
-
             String name = nameField.getText();
-            float xCoordinate = Float.parseFloat(xCoordinateField.getText());
-            Double yCoordinate = Double.parseDouble(yCoordinateField.getText());
+            float xCoordinate = parseFloatSafe(xCoordinateField, "error.val.xCoord");
+            Double yCoordinate = parseDoubleSafe(yCoordinateField, "error.val.yCoord");
+            long salary = parseLongSafe(salaryField, "error.val.salary");
 
-            long salary = Long.parseLong(salaryField.getText());
             Status status = comboBoxStatus.getValue();
             Position position = comboBoxPosition.getValue();
+
             String nameOrganization = nameOrganizationField.getText();
-            float orgAnnualT = Float.parseFloat(orgAnnualTurnoverField.getText());
-            int employeesCount = Integer.parseInt(employeesCountField.getText());
+            float orgAnnualT = parseFloatSafe(orgAnnualTurnoverField, "error.val.orgAnnual");
+            int employeesCount = (int) parseLongSafe(employeesCountField, "error.val.orgEmployeesCount");
 
             var coordinates = new Coordinates(xCoordinate, yCoordinate);
             var organization = new Organization(nameOrganization, orgAnnualT, employeesCount);
 
-
             Worker nuevoWorker = new Worker(0, name, coordinates, null, salary, position, status, organization);
 
-            if(this.workerToUpdate == null){
+            if (this.workerToUpdate == null) {
                 mainController.gerSystemBootstrapper().getProxyWorkerRepository().add(nuevoWorker);
-                mainController.printToConsole("Se ha enviado el comando add al servidor.");
+                String messageToprint = mainController
+                                        .getResources()
+                                        .getString("console.action.success");
+                mainController.printToConsole(messageToprint);
             } else {
-
                 nuevoWorker.setId(workerToUpdate.getId());
                 nuevoWorker.setCreationDate(workerToUpdate.getCreationDate());
+                Result<Void> result = mainController.gerSystemBootstrapper()
+                                                 .getProxyWorkerRepository()
+                                                 .updateWorkerById(nuevoWorker);
+                if(!result.isSuccess()){
+                    mainController.printNetworkError(result.getErrorMessage());
+                }
+            }
+            mainController.closeSidePanel();
+        } catch (IllegalArgumentException e) {
+            String rawMessage = e.getMessage();
 
-                mainController.gerSystemBootstrapper().getProxyWorkerRepository().updateWorkerById(nuevoWorker);
-                mainController.printToConsole("Se ha enviado el comando update al servidor.");
+            String[] parts = rawMessage.split("\\|");
+
+            String fieldKey = parts[0];
+
+            String messageKey = (parts.length > 1) ? parts[1] : parts[0];
+
+            Node inputField = dictionaryErrors.get(fieldKey);
+            Label errorLabel = dictionaryLabels.get(fieldKey);
+
+            String translatedMessage = mainController.getResources().getString(messageKey);
+
+            if (inputField != null && errorLabel != null) {
+                if (!inputField.getStyleClass().contains("input-error")) {
+                    inputField.getStyleClass().add("input-error");
+                }
+                errorLabel.setText(translatedMessage);
+            } else {
+                mainController.printToConsole(translatedMessage);
             }
 
-            mainController.closeSidePanel();
-
-        } catch (NumberFormatException e) {
-            String messageTrans = mainController
-                    .getResources()
-                    .getString("error.val.numberFormat");
-            mainController.printToConsole(messageTrans);
-
-
-        } catch (IllegalArgumentException e) {
-            String error = e.getMessage();
-            String messageTrans = mainController
-                    .getResources()
-                    .getString(error);
-            mainController.printToConsole(messageTrans);
-
         } catch (Exception e) {
-            mainController.printToConsole(e.getMessage());
+            mainController.printToConsole("Error Inesperado: " + e.getMessage());
         }
     }
 
@@ -166,15 +190,54 @@ public class WorkerFormController {
 
 
     public void initErrorDictionary() {
+
         dictionaryErrors.put("error.val.name", nameField);
         dictionaryErrors.put("error.val.xCoord", xCoordinateField);
         dictionaryErrors.put("error.val.yCoord", yCoordinateField);
         dictionaryErrors.put("error.val.salary", salaryField);
         dictionaryErrors.put("error.val.status", comboBoxStatus);
-        dictionaryErrors.put("error.val.position",comboBoxPosition);
-        dictionaryErrors.put("error.val.orgNameLength", nameOrganizationField );
+        dictionaryErrors.put("error.val.position", comboBoxPosition);
+        dictionaryErrors.put("error.val.orgNameLength", nameOrganizationField);
         dictionaryErrors.put("error.val.orgNameEmpty", nameOrganizationField);
         dictionaryErrors.put("error.val.orgAnnual", orgAnnualTurnoverField);
         dictionaryErrors.put("error.val.orgEmployeesCount", employeesCountField);
+
+        dictionaryLabels.put("error.val.name", errorName);
+        dictionaryLabels.put("error.val.xCoord", errorX);
+        dictionaryLabels.put("error.val.yCoord", errorY);
+        dictionaryLabels.put("error.val.salary", errorSalary);
+        dictionaryLabels.put("error.val.status", errorStatus);
+        dictionaryLabels.put("error.val.position", errorPosition);
+        dictionaryLabels.put("error.val.orgNameLength", errorOrgName);
+        dictionaryLabels.put("error.val.orgNameEmpty", errorOrgName);
+        dictionaryLabels.put("error.val.orgAnnual", errorOrgAnnual);
+        dictionaryLabels.put("error.val.orgEmployeesCount", errorOrgEmployees);
     }
+
+
+    private long parseLongSafe(TextField field, String fieldKey) {
+        try {
+            return Long.parseLong(field.getText().trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(fieldKey + "|error.val.numberFormat");
+        }
+    }
+
+    private float parseFloatSafe(TextField field, String fieldKey) {
+        try {
+            return Float.parseFloat(field.getText().trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(fieldKey + "|error.val.numberFormat");
+        }
+    }
+
+    private double parseDoubleSafe(TextField field, String fieldKey) {
+        try {
+            return Double.parseDouble(field.getText().trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(fieldKey + "|error.val.numberFormat");
+        }
+    }
+
+
 }

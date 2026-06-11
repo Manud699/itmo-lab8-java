@@ -1,8 +1,7 @@
 package server.repository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import common.network.Result;
 import server.commands.Command;
 import common.network.Request;
@@ -11,7 +10,7 @@ import common.network.Response;
 
 public class CommandRegistry {
 
-    private final Map<String, Command> commands;    
+    private final Map<String, Command> commands;
 
     public CommandRegistry() {
         this.commands = new HashMap<>();

@@ -29,6 +29,9 @@ public class RemoveByIdCommand extends AbstractCommand {
             return new Response(Result.failure("Invalid id " + request.getCommandArgument()));
         }
         Result<Boolean> result = workerRepository.removeById(workerId.get());
+        if(!result.isSuccess()){
+            return new Response(Result.failure("error.db.permission_denied"));
+        }
         return new Response(result);
     }
 }

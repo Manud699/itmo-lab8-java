@@ -13,4 +13,9 @@ module client {
     exports client.network;
     opens client.network to javafx.fxml;
 
+
+    exports client.i18n;
+    opens client.i18n to javafx.fxml, javafx.graphics;
+
+
 }

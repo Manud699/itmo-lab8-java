@@ -3,6 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
@@ -21,7 +23,7 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TableView fx:id="workersTable" layoutY="-24.0" prefHeight="606.0" prefWidth="1091.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="0.0">
+                        <TableView fx:id="workersTable" layoutX="-1.0" prefHeight="606.0" prefWidth="1091.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-1.0" AnchorPane.rightAnchor="15.400000000000091" AnchorPane.topAnchor="0.0">
                           <columns>
                             <TableColumn fx:id="idColumn" prefWidth="38.40002363920212" text="id" />
                             <TableColumn fx:id="nameColumn" prefWidth="72.00000381469727" text="name " />
@@ -68,7 +70,20 @@
                   <Button fx:id="addButton" mnemonicParsing="false" onAction="#handleAddAction" prefHeight="26.0" prefWidth="124.0" styleClass="btn-cyber" text="add" />
                   <Button fx:id="clearButton" mnemonicParsing="false" onAction="#handleClearAction" styleClass="btn-cyber" text="clear" />
                   <Button fx:id="updateButton" mnemonicParsing="false" onAction="#handleUpdateAction" prefHeight="26.0" styleClass="btn-cyber" text="update" />
-                  <Button fx:id="removeHeadButton" mnemonicParsing="false" onAction="#handleRemoveHeadAction" styleClass="btn-cyber" text="remove head" />
+                  <MenuButton fx:id="deleteMenuButton" mnemonicParsing="false" styleClass="btn-cyber" text="delete">
+                    <items>
+                      <MenuItem fx:id="removeByIdMenuItem" mnemonicParsing="false" onAction="#handleRemoveByIdAction" styleClass="btn-cyber" text="Remove by id" />
+                      <MenuItem fx:id="removeByPosMenuItem" mnemonicParsing="false" onAction="#handleRemoveByPositionAction" styleClass="bto-cyber" text="Remove all by position" />
+                    </items>
+                  </MenuButton>
+                  <MenuButton fx:id="viewMenuButton" mnemonicParsing="false" styleClass="btn-cyber" text="ver">
+                    <items>
+                      <MenuItem fx:id="printSalaryMenuItem" mnemonicParsing="false" onAction="#handleFieldDescSalary" styleClass="btn-cyber" text="Salarios Descendentes" />
+                      <MenuItem fx:id="headItemMenu" mnemonicParsing="false" onAction="#handleHeadAction" styleClass="btn-cyber" text="Primer Elemento (Head)" />
+                        <MenuItem fx:id="helpItemMenu" mnemonicParsing="false" onAction="#handleHelpAction" styleClass="btn-cyber" text="help " />
+                        <MenuItem fx:id="historyItemMenu" mnemonicParsing="false" onAction="#handleHistoryAction" styleClass="btn-cyber" text="history" />
+                    </items>
+                  </MenuButton>
                   <Button fx:id="exitButton" mnemonicParsing="false" onAction="#handleExitAction" styleClass="btn-cyber" text="exit" />
                   <Button fx:id="signOutButton" mnemonicParsing="false" onAction="#handleSignOutAction" styleClass="btn-cyber" text="sign out" />
                </children>
