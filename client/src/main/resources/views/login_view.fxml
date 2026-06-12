@@ -1,20 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="351.0" prefWidth="418.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.LoginController">
+<AnchorPane prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: #0b0b12;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.LoginController">
    <children>
-      <TextField fx:id="userName" layoutX="131.0" layoutY="65.0" prefHeight="26.0" prefWidth="156.0" />
-      <PasswordField fx:id="passwordField" layoutX="131.0" layoutY="115.0" prefHeight="26.0" prefWidth="156.0" />
-      <Button fx:id="registerButton" layoutX="146.0" layoutY="191.0" mnemonicParsing="false" onAction="#handleRegisterAction" prefHeight="26.0" prefWidth="125.0" text="register" />
-      <Button fx:id="loginButton" layoutX="167.0" layoutY="241.0" mnemonicParsing="false" onAction="#handleLoginAction" prefHeight="26.0" prefWidth="82.0" text="login" />
-      <ComboBox fx:id="languageCombox" layoutX="294.0" layoutY="294.0" prefHeight="26.0" prefWidth="110.0" promptText="idioma" />
-      <Label fx:id="nameLabel" layoutX="131.0" layoutY="91.0" prefHeight="24.0" prefWidth="156.0" text="name*" />
-      <Label fx:id="passwordLabel" layoutX="131.0" layoutY="141.0" prefHeight="26.0" prefWidth="156.0" text="password*" />
+
+      <Button fx:id="closeButton" mnemonicParsing="false" onAction="#handleCloseAction" styleClass="btn-cyber" text="X" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0" />
+
+      <ComboBox fx:id="languageCombox" promptText="idioma" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" />
+
+      <VBox alignment="CENTER" spacing="25.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
+         <children>
+
+            <Label styleClass="titulo-login" text="SYSTEM LOGIN" />
+
+            <VBox alignment="CENTER_LEFT" maxWidth="250.0" spacing="5.0">
+               <children>
+                  <Label fx:id="nameLabel" text="Usuario *" />
+                  <TextField fx:id="userName" prefHeight="30.0" promptText="Ingrese su usuario..." />
+               </children>
+            </VBox>
+
+            <VBox alignment="CENTER_LEFT" maxWidth="250.0" spacing="5.0">
+               <children>
+                  <Label fx:id="passwordLabel" text="Contraseña *" />
+
+                  <StackPane>
+                     <children>
+                        <PasswordField fx:id="passwordField" prefHeight="30.0" promptText="••••••••" />
+                        <TextField fx:id="passwordTextField" prefHeight="30.0" visible="false" />
+                     </children>
+                  </StackPane>
+
+                  <CheckBox fx:id="showPasswordCheckBox" mnemonicParsing="false" text="Mostrar contraseña" />
+               </children>
+            </VBox>
+
+            <HBox alignment="CENTER" spacing="20.0">
+               <children>
+                  <Button fx:id="loginButton" mnemonicParsing="false" onAction="#handleLoginAction" styleClass="btn-cyber" text="Login" />
+                  <Button fx:id="registerButton" mnemonicParsing="false" onAction="#handleRegisterAction" styleClass="btn-cyber" text="Register" />
+               </children>
+            </HBox>
+
+         </children>
+      </VBox>
    </children>
 </AnchorPane>

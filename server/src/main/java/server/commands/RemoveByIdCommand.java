@@ -26,7 +26,7 @@ public class RemoveByIdCommand extends AbstractCommand {
 
         Optional<Long> workerId = NumberParseSafe.parse(request.getCommandArgument(), Long::parseLong);
         if(workerId.isEmpty()){
-            return new Response(Result.failure("Invalid id " + request.getCommandArgument()));
+            return new Response(Result.failure("error.val.numberFormat"));
         }
         Result<Boolean> result = workerRepository.removeById(workerId.get());
         if(!result.isSuccess()){

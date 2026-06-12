@@ -35,7 +35,7 @@ public class UpdateByIdCommand extends AbstractCommand{
 
         Result<Boolean> existById = workerRepository.existById(optionalWorker.get().getId());
         if(!existById.getValue())
-            return new Response(Result.failure("Worker id not existent"));
+            return new Response(Result.failure("error.db.permission_denied"));
 
 
         Result<Void> resultUpdateWorker = workerRepository.updateWorkerById(optionalWorker.get());

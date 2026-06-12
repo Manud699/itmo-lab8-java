@@ -6,7 +6,7 @@ import common.network.User;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
-
+import javafx.application.Platform;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -23,6 +23,8 @@ public class LoginController {
     @FXML private Button registerButton;
     @FXML private Label passwordLabel;
     @FXML private Label nameLabel;
+    @FXML private TextField passwordTextField;
+    @FXML private CheckBox showPasswordCheckBox;
 
     private SystemBootstrapper systemBootstrapper;
     private RunnerMainController runnerMainController;
@@ -32,11 +34,36 @@ public class LoginController {
 
 
     public void initialize() {
+        languageCombox.getItems().clear();
         mapLanguages.put("Ruso", "ru");
         mapLanguages.put("Español (Colombia)", "es");
         mapLocation.put("ru", "RU");
         mapLocation.put("es", "CO");
+        passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());
+        passwordTextField.setVisible(false);
+        passwordTextField.setManaged(false);
+        showPasswordCheckBox.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+            if (isSelected) {
+                passwordTextField.setVisible(true);
+                passwordTextField.setManaged(true);
+                passwordField.setVisible(false);
+                passwordField.setManaged(false);
+            } else {
+                passwordTextField.setVisible(false);
+                passwordTextField.setManaged(false);
+                passwordField.setVisible(true);
+                passwordField.setManaged(true);
+            }
+        });
         setBoxComboOptions();
+
+
+        languageCombox.setOnAction(action -> {
+            String idioma = languageCombox.getValue();
+            if (idioma != null) {
+                changeLanguage(idioma);
+            }
+        });
     }
 
 
@@ -62,7 +89,7 @@ public class LoginController {
         String languageChoosed = mapLanguages.get(language);
         String locationLanguage = mapLocation.get(languageChoosed);
         var locale = new Locale(languageChoosed, locationLanguage);
-        this.resources = ResourceBundle.getBundle("i18n.Messages", locale);
+        this.resources = ResourceBundle.getBundle("client.i18n.Messages", locale);
         updateTextInterface();
     }
 
@@ -126,9 +153,8 @@ public class LoginController {
 
             showMessage(message, Color.GREEN);
             if (runnerMainController != null) {
-                runnerMainController.loadMainView();
                 systemBootstrapper.getClientSession().setUser(user);
-                return;
+                runnerMainController.loadMainView();
             }
 
         } catch (IllegalArgumentException e){
@@ -137,4 +163,13 @@ public class LoginController {
             showMessage("Ocurrió un error inesperado. Inténtalo de nuevo.", Color.RED);
         }
     }
+
+
+    @FXML
+    public void handleCloseAction() {
+        Platform.exit();
+        System.exit(0);
+    }
+
+
 }
