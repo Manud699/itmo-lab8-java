@@ -25,6 +25,7 @@ public class LoginController {
     @FXML private Label nameLabel;
     @FXML private TextField passwordTextField;
     @FXML private CheckBox showPasswordCheckBox;
+    @FXML private Label requiredLegendLabel;
 
     private SystemBootstrapper systemBootstrapper;
     private RunnerMainController runnerMainController;
@@ -94,7 +95,6 @@ public class LoginController {
     }
 
 
-
     private void setBoxComboOptions(){
 
         languageCombox.getItems().addAll("Español (Colombia)", "Ruso");
@@ -114,12 +114,9 @@ public class LoginController {
         registerButton.setText(resources.getString("button.register"));
         passwordLabel.setText(resources.getString("label.password"));
         nameLabel.setText(resources.getString("label.name"));
+        requiredLegendLabel.setText(resources.getString("label.requiredFields"));
 
     }
-
-
-
-
 
 
     public void setRunnerMainController(RunnerMainController runnerMainController) {

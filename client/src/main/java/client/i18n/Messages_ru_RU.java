@@ -27,6 +27,7 @@ public class Messages_ru_RU extends ListResourceBundle {
                 { "label.password",           "Пароль *" },
                 { "checkbox.showPassword",    "Показать пароль" },
                 { "label.welcome",            "Добро пожаловать, %s" },
+                { "label.requiredFields", "* - обязательные поля" },
 
                 // ==========================================
                 // 3. BOTONES Y MENÚS PRINCIPALES

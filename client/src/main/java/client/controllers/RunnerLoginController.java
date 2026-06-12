@@ -20,6 +20,9 @@ public class RunnerLoginController {
     public void loadLoginView() {
         try{
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/login_view.fxml"));
+            java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("client.i18n.Messages", new java.util.Locale("es", "CO"));
+            loader.setResources(bundle);
+
             Parent root = loader.load();
             Scene loginScene = new Scene(root);
 

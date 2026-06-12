@@ -168,17 +168,12 @@ public class DataBaseWorker implements WorkerRepository {
                 connection -> {
                     String nameUser = UserContext.get().name();
                     String requestSql = "UPDATE worker " +
-                            "SET name = ?, " +
-                            "coordinate_x = ?, " +
-                            "coordinate_y = ?, " +
-                            "salary = ?, " +
-                            "position = ?, " +
-                            "status = ?, " +
-                            "org_full_name = ?, " +
-                            "org_annual_turnover = ?, " +
+                            "SET name = ?, coordinate_x = ?, coordinate_y = ?, salary = ?, " +
+                            "position = ?, status = ?, org_full_name = ?, org_annual_turnover = ?, " +
                             "org_employees_count = ? " +
                             "WHERE id = ? AND id_user = " +
                             "(SELECT id FROM users WHERE name = ?)";
+
                     try (PreparedStatement preparedStatement = connection.prepareStatement(requestSql)) {
 
                         preparedStatement.setString(1, workerUpdated.getName());
@@ -200,12 +195,22 @@ public class DataBaseWorker implements WorkerRepository {
                             localWorkerRepository.updateWorkerById(workerUpdated);
                             return Result.success();
                         } else {
-                            return Result.failure("error.db.permission_denied");
+                            String checkSql = "SELECT id FROM worker WHERE id = ?";
+                            try (PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
+                                checkStmt.setLong(1, workerUpdated.getId());
+                                try (ResultSet rs = checkStmt.executeQuery()) {
+                                    if (rs.next()) {
+                                        return Result.failure("error.db.permission_denied");
+                                    } else {
+
+                                        return Result.failure("error.db.not_found");
+                                    }
+                                }
+                            }
                         }
                     }
                 });
-        }
-
+    }
 
     @Override
     public Result<Boolean> removeById(long id) {
@@ -216,19 +221,31 @@ public class DataBaseWorker implements WorkerRepository {
                             "WHERE id = ? AND id_user = " +
                             "(SELECT id FROM users " +
                             "WHERE name = ?)";
+
                     try (PreparedStatement preparedStatement = connection.prepareStatement(requestSql)) {
                         preparedStatement.setLong(1, id);
                         preparedStatement.setString(2, nameUser);
                         int rowDeleted = preparedStatement.executeUpdate();
+
                         if (rowDeleted > 0) {
                             localWorkerRepository.removeById(id);
                             return Result.success(true);
                         } else {
-                            return Result.failure("error.db.permission_denied");
+                            String checkSql = "SELECT id FROM worker WHERE id = ?";
+                            try (PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
+                                checkStmt.setLong(1, id);
+                                try (ResultSet rs = checkStmt.executeQuery()) {
+                                    if (rs.next()) {
+                                        return Result.failure("error.db.permission_denied");
+                                    } else {
+                                        return Result.failure("error.db.not_found");
+                                    }
+                                }
+                            }
                         }
                     }
                 });
-        }
+    }
 
 
     @Override

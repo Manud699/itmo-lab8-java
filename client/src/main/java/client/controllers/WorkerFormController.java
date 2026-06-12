@@ -10,50 +10,22 @@ import java.util.HashMap;
 
 public class WorkerFormController {
 
-    public WorkerFormController(){
-        this.dictionaryErrors = new HashMap<>(16);
-        this.dictionaryLabels = new HashMap<>(16);
-    }
-
     private MainController mainController;
+    private Worker workerToUpdate = null;
 
-    @FXML
-    private TextField nameField;
-    @FXML
-    private TextField xCoordinateField;
-    @FXML
-    private TextField yCoordinateField;
-    @FXML
-    private TextField salaryField;
-    @FXML
-    private TextField nameOrganizationField;
-    @FXML
-    private TextField orgAnnualTurnoverField;
-    @FXML
-    private TextField employeesCountField;
-    @FXML
-    private ComboBox<Position> comboBoxPosition;
-    @FXML
-    private ComboBox<Status> comboBoxStatus;
+    private final HashMap<String, Node> dictionaryErrors = new HashMap<>(16);
+    private final HashMap<String, Label> dictionaryLabels = new HashMap<>(16);
 
-    @FXML
-    private Label addName;
-    @FXML
-    private Label addX;
-    @FXML
-    private Label addY;
-    @FXML
-    private Label addSalary;
-    @FXML
-    private Label addPosition;
-    @FXML
-    private Label addStatus;
-    @FXML
-    private Label addNameOrg;
-    @FXML
-    private Label addOrgAnnual;
-    @FXML
-    private Label addEmployees;
+    @FXML private TextField nameField;
+    @FXML private TextField xCoordinateField;
+    @FXML private TextField yCoordinateField;
+    @FXML private TextField salaryField;
+    @FXML private TextField nameOrganizationField;
+    @FXML private TextField orgAnnualTurnoverField;
+    @FXML private TextField employeesCountField;
+
+    @FXML private ComboBox<Position> comboBoxPosition;
+    @FXML private ComboBox<Status> comboBoxStatus;
 
     @FXML private Label errorName;
     @FXML private Label errorX;
@@ -65,17 +37,6 @@ public class WorkerFormController {
     @FXML private Label errorOrgAnnual;
     @FXML private Label errorOrgEmployees;
 
-
-    HashMap <String, Node> dictionaryErrors;
-    private HashMap<String, Label> dictionaryLabels;
-
-
-    protected final String ESTILO_ERROR = "-fx-border-color: red; -fx-border-width: 2px; -fx-border-radius: 3px;";
-
-    private Worker workerToUpdate = null;
-
-
-
     @FXML
     public void initialize() {
         comboBoxStatus.getItems().addAll(Status.values());
@@ -83,21 +44,9 @@ public class WorkerFormController {
         initErrorDictionary();
     }
 
-
-
-    @FXML
-    public void handleCancelAction(){
-        mainController.closeSidePanel();
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
     }
-
-
-
-    protected void clearErrorStyles() {
-        dictionaryErrors.values().forEach(node -> node.getStyleClass().remove("input-error"));
-        dictionaryLabels.values().forEach(label -> label.setText(""));
-    }
-
-
 
     public void setWorkerForUpdate(Worker worker) {
         this.workerToUpdate = worker;
@@ -111,8 +60,6 @@ public class WorkerFormController {
         orgAnnualTurnoverField.setText(String.valueOf(worker.getOrganization().getAnnualTurnover()));
         employeesCountField.setText(String.valueOf(worker.getOrganization().getEmployeesCount()));
     }
-
-
 
     @FXML
     public void handleSaveAction() {
@@ -138,33 +85,29 @@ public class WorkerFormController {
 
             if (this.workerToUpdate == null) {
                 mainController.gerSystemBootstrapper().getProxyWorkerRepository().add(nuevoWorker);
-                String messageToprint = mainController
-                                        .getResources()
-                                        .getString("console.action.success");
-                mainController.printToConsole(messageToprint);
+                mainController.printToConsole(mainController.getResources().getString("console.action.success"));
             } else {
                 nuevoWorker.setId(workerToUpdate.getId());
                 nuevoWorker.setCreationDate(workerToUpdate.getCreationDate());
                 Result<Void> result = mainController.gerSystemBootstrapper()
-                                                 .getProxyWorkerRepository()
-                                                 .updateWorkerById(nuevoWorker);
-                if(!result.isSuccess()){
+                        .getProxyWorkerRepository()
+                        .updateWorkerById(nuevoWorker);
+                if (!result.isSuccess()) {
                     mainController.printNetworkError(result.getErrorMessage());
+                } else {
+                    mainController.printToConsole(mainController.getResources().getString("console.action.success"));
                 }
             }
             mainController.closeSidePanel();
+
         } catch (IllegalArgumentException e) {
             String rawMessage = e.getMessage();
-
             String[] parts = rawMessage.split("\\|");
-
             String fieldKey = parts[0];
-
             String messageKey = (parts.length > 1) ? parts[1] : parts[0];
 
             Node inputField = dictionaryErrors.get(fieldKey);
             Label errorLabel = dictionaryLabels.get(fieldKey);
-
             String translatedMessage = mainController.getResources().getString(messageKey);
 
             if (inputField != null && errorLabel != null) {
@@ -173,24 +116,24 @@ public class WorkerFormController {
                 }
                 errorLabel.setText(translatedMessage);
             } else {
-                mainController.printToConsole(translatedMessage);
+                mainController.printErrorToConsole(translatedMessage);
             }
-
         } catch (Exception e) {
-            mainController.printToConsole("Error Inesperado: " + e.getMessage());
+            mainController.printErrorToConsole("Error Inesperado: " + e.getMessage());
         }
     }
 
-
-
-    public void setMainController(MainController mainController){
-        this.mainController = mainController;
+    @FXML
+    public void handleCancelAction() {
+        mainController.closeSidePanel();
     }
 
+    protected void clearErrorStyles() {
+        dictionaryErrors.values().forEach(node -> node.getStyleClass().remove("input-error"));
+        dictionaryLabels.values().forEach(label -> label.setText(""));
+    }
 
-
-    public void initErrorDictionary() {
-
+    private void initErrorDictionary() {
         dictionaryErrors.put("error.val.name", nameField);
         dictionaryErrors.put("error.val.xCoord", xCoordinateField);
         dictionaryErrors.put("error.val.yCoord", yCoordinateField);
@@ -213,7 +156,6 @@ public class WorkerFormController {
         dictionaryLabels.put("error.val.orgAnnual", errorOrgAnnual);
         dictionaryLabels.put("error.val.orgEmployeesCount", errorOrgEmployees);
     }
-
 
     private long parseLongSafe(TextField field, String fieldKey) {
         try {
@@ -238,6 +180,4 @@ public class WorkerFormController {
             throw new IllegalArgumentException(fieldKey + "|error.val.numberFormat");
         }
     }
-
-
 }

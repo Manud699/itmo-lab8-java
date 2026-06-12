@@ -197,6 +197,8 @@ public class MainController {
         }
     }
 
+
+
     @FXML
     public void handleUpdateAction() {
         try {
@@ -218,12 +220,16 @@ public class MainController {
         }
     }
 
+
+
     @FXML
     public void handleClearAction() {
         bootstrapper.getProxyWorkerRepository().clear();
         printToConsole(resources.getString("console.action.success"));
         commandHistory.addCommand("cmd.clear");
     }
+
+
 
     @FXML
     public void handleRemoveByIdAction() {
@@ -254,6 +260,8 @@ public class MainController {
         });
     }
 
+
+
     @FXML
     public void handleRemoveByPositionAction() {
         List<Position> choices = Arrays.asList(Position.values());
@@ -277,6 +285,8 @@ public class MainController {
         });
     }
 
+
+
     public void handleSumOfSalaryAction() {
         Result<Long> result = bootstrapper.getProxyWorkerRepository().sumOfSalary();
         if (!result.isSuccess()) {
@@ -293,6 +303,8 @@ public class MainController {
         printToConsole(output);
         commandHistory.addCommand("cmd.sum_of_salary");
     }
+
+
 
     public void handleFieldDescSalary() {
         Result<List<Long>> resultSalary = bootstrapper.getProxyWorkerRepository().getDescendingSalaries();
@@ -315,6 +327,8 @@ public class MainController {
         commandHistory.addCommand("cmd.print_salary");
     }
 
+
+
     public void handleHeadAction() {
         Result<Worker> resultWorker = bootstrapper.getProxyWorkerRepository().getHead();
         if (!resultWorker.isSuccess()) {
@@ -328,6 +342,8 @@ public class MainController {
         showWorkerDetailsDialog(resultWorker.getValue());
         commandHistory.addCommand("cmd.head");
     }
+
+
 
     @FXML
     public void handleHistoryAction() {
@@ -346,6 +362,8 @@ public class MainController {
         commandHistory.addCommand("cmd.history");
     }
 
+
+
     @FXML
     public void handleHelpAction() {
         String[] commandKeys = {"add", "clear", "update", "head", "print_salary", "remove_by_id", "remove_by_pos", "history", "help"};
@@ -356,6 +374,8 @@ public class MainController {
         printToConsole(sb.toString());
         commandHistory.addCommand("cmd.help");
     }
+
+
 
     @FXML
     public void handleThemeToggle() {
@@ -371,6 +391,8 @@ public class MainController {
         }
     }
 
+
+
     @FXML
     public void handleSignOutAction() {
         try {
@@ -382,6 +404,8 @@ public class MainController {
         }
     }
 
+
+
     @FXML
     public void handleExitAction() {
         Platform.exit();
@@ -389,11 +413,14 @@ public class MainController {
     }
 
 
+
     public void updateTableView(List<Worker> listFromServer) {
         ObservableList<Worker> observableList = FXCollections.observableList(listFromServer);
         workersTable.setItems(observableList);
         Platform.runLater(this::drawObjects);
     }
+
+
 
     public void drawObjects() {
         if (visualCanvas == null) return;
@@ -405,6 +432,8 @@ public class MainController {
         );
         animationTimeline.play();
     }
+
+
 
     private void renderCanvasFrame() {
         if (visualCanvas == null) return;
@@ -420,11 +449,30 @@ public class MainController {
         double centerX = width / 2;
         double centerY = height / 2;
 
+
         gc.clearRect(0, 0, width, height);
-        gc.setStroke(Color.web("#1a1a24"));
-        gc.setLineWidth(1);
+
+        gc.save();
+        gc.setStroke(Color.web("#161622"));
+        gc.setLineWidth(0.5);
+
+        double gridSize = 40.0;
+
+
+        for (double x = centerX; x < width; x += gridSize) gc.strokeLine(x, 0, x, height);
+        for (double x = centerX; x > 0; x -= gridSize) gc.strokeLine(x, 0, x, height);
+
+
+        for (double y = centerY; y < height; y += gridSize) gc.strokeLine(0, y, width, y);
+        for (double y = centerY; y > 0; y -= gridSize) gc.strokeLine(0, y, width, y);
+        gc.restore();
+
+
+        gc.setStroke(Color.web("#252538"));
+        gc.setLineWidth(1.5);
         gc.strokeLine(0, centerY, width, centerY);
         gc.strokeLine(centerX, 0, centerX, height);
+
 
         double maxX = 1, maxY = 1;
         for (Worker w : workersTable.getItems()) {
@@ -509,19 +557,30 @@ public class MainController {
             clickedWorker.ifPresent(worker -> {
                 if (event.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
                     if (event.getClickCount() == 1) showWorkerDetailsDialog(worker);
-                    else if (event.getClickCount() == 2) { workersTable.getSelectionModel().select(worker); handleUpdateAction(); }
+                    else if (event.getClickCount() == 2) {
+                        workersTable.getSelectionModel().select(worker); handleUpdateAction();
+                    }
                 } else if (event.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
                     infoItem.setText(resources.getString("menu.info"));
                     updateItem.setText(resources.getString("menu.update"));
                     deleteItem.setText(resources.getString("menu.delete"));
-                    infoItem.setOnAction(e -> { showWorkerDetailsDialog(worker); commandHistory.addCommand("menu.info"); });
-                    updateItem.setOnAction(e -> { workersTable.getSelectionModel().select(worker); handleUpdateAction(); });
+                    infoItem.setOnAction(e -> {
+                        showWorkerDetailsDialog(worker);
+                        commandHistory.addCommand("menu.info");
+                    });
+                    updateItem.setOnAction(e -> {
+                        workersTable.getSelectionModel().select(worker);
+                        handleUpdateAction();
+                    });
+
                     deleteItem.setOnAction(e -> confirmAndRemoveWorker(worker));
+
                     canvasContextMenu.show(visualCanvas, event.getScreenX(), event.getScreenY());
                 }
             });
         });
     }
+
 
 
     private void setBoxComboOptions() {
@@ -533,6 +592,8 @@ public class MainController {
         });
     }
 
+
+
     private void changeLanguage(String language) {
         Locale locale = new Locale(mapLanguages.get(language), mapLocation.get(mapLanguages.get(language)));
         this.resources = ResourceBundle.getBundle("client.i18n.Messages", locale);
@@ -540,6 +601,8 @@ public class MainController {
         closeSidePanel();
         workersTable.refresh();
     }
+
+
 
     private void setupContextMenu() {
         workersTable.setRowFactory(tv -> {
@@ -558,6 +621,8 @@ public class MainController {
             return tableRow;
         });
     }
+
+
 
     private void confirmAndRemoveWorker(Worker worker) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -583,6 +648,8 @@ public class MainController {
             }
         });
     }
+
+
 
     private void showWorkerDetailsDialog(Worker worker) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -643,6 +710,8 @@ public class MainController {
             return Color.hsb(hash % 360, 0.8, 0.9, 0.55);
         });
     }
+
+
 
     public void updateTextInterface() {
         if (resources == null) return;

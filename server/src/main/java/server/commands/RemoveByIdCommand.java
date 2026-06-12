@@ -28,10 +28,6 @@ public class RemoveByIdCommand extends AbstractCommand {
         if(workerId.isEmpty()){
             return new Response(Result.failure("error.val.numberFormat"));
         }
-        Result<Boolean> result = workerRepository.removeById(workerId.get());
-        if(!result.isSuccess()){
-            return new Response(Result.failure("error.db.permission_denied"));
-        }
-        return new Response(result);
+        return new Response(workerRepository.removeById(workerId.get()));
     }
 }
