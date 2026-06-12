@@ -29,6 +29,7 @@ import javafx.util.Duration;
 
 import java.text.NumberFormat;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.*;
@@ -48,11 +49,12 @@ public class MainController {
     private Timeline animationTimeline;
     private boolean isDarkMode = true;
 
+    private ZoneId currentZone = ZoneId.systemDefault();
+    private final Map<String, ZoneId> mapTimeZones = new HashMap<>();
 
     @FXML private BorderPane mainBorderPane;
     @FXML private Tab workersTab;
     @FXML private ResourceBundle resources;
-
 
     @FXML private TableView<Worker> workersTable;
     @FXML private TableColumn<Worker, Long> idColumn;
@@ -67,7 +69,6 @@ public class MainController {
     @FXML private TableColumn<Worker, Float> orgAnnualTurnoverColumn;
     @FXML private TableColumn<Worker, Integer> employeesCountColumn;
     @FXML private TableColumn<Worker, String> ownerColumn;
-
 
     @FXML private Pane canvasContainer;
     @FXML private Canvas visualCanvas;
@@ -93,23 +94,28 @@ public class MainController {
     @FXML private MenuItem historyItemMenu;
     @FXML private MenuItem sumSalaryItemMenu;
 
-
-
     @FXML
     public void initialize() {
-
         mapLanguages.put("Ruso", "ru");
         mapLanguages.put("Español (Colombia)", "es");
+        mapLanguages.put("Polaco", "pl");
+        mapLanguages.put("Noruego", "no");
+
         mapLocation.put("ru", "RU");
         mapLocation.put("es", "CO");
-        setBoxComboOptions();
 
+        mapTimeZones.put("ru", ZoneId.of("Europe/Moscow"));
+        mapTimeZones.put("es", ZoneId.of("America/Bogota"));
+        mapTimeZones.put("pl", ZoneId.of("Europe/Warsaw"));
+        mapTimeZones.put("no", ZoneId.of("Europe/Oslo"));
+
+        setBoxComboOptions();
         setupTableColumns();
         setupContextMenu();
         setupCanvasInteractions();
 
-
         animationProgress.addListener((obs, oldVal, newVal) -> renderCanvasFrame());
+
         if (canvasContainer != null && visualCanvas != null) {
             visualCanvas.widthProperty().bind(canvasContainer.widthProperty());
             visualCanvas.heightProperty().bind(canvasContainer.heightProperty());
@@ -139,8 +145,6 @@ public class MainController {
             return new SimpleStringProperty(zoneDateTime.format(formato));
         });
 
-
-
         creationDateColumn.setCellFactory(col -> new TableCell<Worker, String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -159,8 +163,11 @@ public class MainController {
             @Override
             protected void updateItem(Long item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) setText(null);
-                else setText(NumberFormat.getCurrencyInstance(resources.getLocale()).format(item));
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(NumberFormat.getCurrencyInstance(resources.getLocale()).format(item));
+                }
             }
         });
 
@@ -174,13 +181,14 @@ public class MainController {
             @Override
             protected void updateItem(T item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) setText(null);
-                else setText(NumberFormat.getNumberInstance(resources.getLocale()).format(item));
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(NumberFormat.getNumberInstance(resources.getLocale()).format(item));
+                }
             }
         };
     }
-
-
 
     @FXML
     public void handleAddAction() {
@@ -188,8 +196,10 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/worker_form_view.fxml"));
             loader.setResources(this.resources);
             GridPane gridPane = loader.load();
+
             WorkerFormController formWorker = loader.getController();
             formWorker.setMainController(this);
+
             mainBorderPane.setRight(gridPane);
             commandHistory.addCommand("cmd.add");
         } catch (Exception e) {
@@ -197,22 +207,23 @@ public class MainController {
         }
     }
 
-
-
     @FXML
     public void handleUpdateAction() {
         try {
-            var worker = workersTable.getSelectionModel().getSelectedItem();
+            Worker worker = workersTable.getSelectionModel().getSelectedItem();
             if (worker == null) {
                 printErrorToConsole(resources.getString("console.choose.worker"));
                 return;
             }
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/worker_form_view.fxml"));
             loader.setResources(resources);
             GridPane gridPane = loader.load();
+
             WorkerFormController formController = loader.getController();
             formController.setMainController(this);
             formController.setWorkerForUpdate(worker);
+
             mainBorderPane.setRight(gridPane);
             commandHistory.addCommand("cmd.update");
         } catch (Exception e) {
@@ -220,16 +231,12 @@ public class MainController {
         }
     }
 
-
-
     @FXML
     public void handleClearAction() {
         bootstrapper.getProxyWorkerRepository().clear();
         printToConsole(resources.getString("console.action.success"));
         commandHistory.addCommand("cmd.clear");
     }
-
-
 
     @FXML
     public void handleRemoveByIdAction() {
@@ -239,19 +246,18 @@ public class MainController {
         dialog.setGraphic(null);
         dialog.getDialogPane().setGraphic(null);
 
-        try {
-            dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
-            dialog.getDialogPane().getStyleClass().add("form-panel");
-        } catch (Exception ignored) { }
+        styleAndTranslateDialog(dialog);
 
         dialog.showAndWait().ifPresent(idStr -> {
             try {
                 long id = Long.parseLong(idStr.trim());
                 Result<Boolean> response = bootstrapper.getProxyWorkerRepository().removeById(id);
+
                 if (!response.isSuccess()) {
                     printNetworkError(response.getErrorMessage());
                     return;
                 }
+
                 printToConsole(resources.getString("console.remove.success"));
                 commandHistory.addCommand("cmd.remove_by_id");
             } catch (NumberFormatException e) {
@@ -260,8 +266,6 @@ public class MainController {
         });
     }
 
-
-
     @FXML
     public void handleRemoveByPositionAction() {
         List<Position> choices = Arrays.asList(Position.values());
@@ -269,23 +273,20 @@ public class MainController {
         dialog.setTitle(resources.getString("dialog.removePos.title"));
         dialog.setHeaderText(resources.getString("dialog.removePos.header"));
 
-        try {
-            dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
-            dialog.getDialogPane().getStyleClass().add("form-panel");
-        } catch (Exception ignored) { }
+        styleAndTranslateDialog(dialog);
 
         dialog.showAndWait().ifPresent(selectedPosition -> {
             Result<Integer> response = bootstrapper.getProxyWorkerRepository().removeAllByPosition(selectedPosition);
+
             if (!response.isSuccess()) {
                 printNetworkError(response.getErrorMessage());
                 return;
             }
+
             printToConsole(resources.getString("console.remove.success"));
             commandHistory.addCommand("cmd.remove_by_pos");
         });
     }
-
-
 
     public void handleSumOfSalaryAction() {
         Result<Long> result = bootstrapper.getProxyWorkerRepository().sumOfSalary();
@@ -293,6 +294,7 @@ public class MainController {
             printNetworkError(result.getErrorMessage());
             return;
         }
+
         long totalSuma = result.getValue() != null ? result.getValue() : 0L;
         NumberFormat moneyFormatter = NumberFormat.getCurrencyInstance(resources.getLocale());
 
@@ -304,14 +306,14 @@ public class MainController {
         commandHistory.addCommand("cmd.sum_of_salary");
     }
 
-
-
     public void handleFieldDescSalary() {
         Result<List<Long>> resultSalary = bootstrapper.getProxyWorkerRepository().getDescendingSalaries();
+
         if (!resultSalary.isSuccess()) {
             printNetworkError(resultSalary.getErrorMessage());
             return;
         }
+
         if (resultSalary.getValue() == null || resultSalary.getValue().isEmpty()) {
             printToConsole(resources.getString("console.notResults"));
             return;
@@ -319,6 +321,7 @@ public class MainController {
 
         StringBuilder sb = new StringBuilder(resources.getString("console.salary.header")).append("\n");
         NumberFormat moneyFormatter = NumberFormat.getCurrencyInstance(resources.getLocale());
+
         for (Long item : resultSalary.getValue()) {
             sb.append("   > ").append(moneyFormatter.format(item)).append("\n");
         }
@@ -327,27 +330,27 @@ public class MainController {
         commandHistory.addCommand("cmd.print_salary");
     }
 
-
-
     public void handleHeadAction() {
         Result<Worker> resultWorker = bootstrapper.getProxyWorkerRepository().getHead();
+
         if (!resultWorker.isSuccess()) {
             printNetworkError(resultWorker.getErrorMessage());
             return;
         }
+
         if (resultWorker.getValue() == null) {
             printToConsole(resources.getString("console.notResults"));
             return;
         }
+
         showWorkerDetailsDialog(resultWorker.getValue());
         commandHistory.addCommand("cmd.head");
     }
 
-
-
     @FXML
     public void handleHistoryAction() {
         List<String> comandosGuardados = commandHistory.getHistoryList();
+
         if (comandosGuardados.isEmpty()) {
             printToConsole(resources.getString("console.history.empty"));
             return;
@@ -362,26 +365,25 @@ public class MainController {
         commandHistory.addCommand("cmd.history");
     }
 
-
-
     @FXML
     public void handleHelpAction() {
         String[] commandKeys = {"add", "clear", "update", "head", "print_salary", "remove_by_id", "remove_by_pos", "history", "help"};
         StringBuilder sb = new StringBuilder(resources.getString("console.help.header")).append("\n");
+
         for (String key : commandKeys) {
             sb.append(String.format("  > %-25s : %s\n", resources.getString("cmd." + key), resources.getString("desc." + key)));
         }
+
         printToConsole(sb.toString());
         commandHistory.addCommand("cmd.help");
     }
-
-
 
     @FXML
     public void handleThemeToggle() {
         isDarkMode = !isDarkMode;
         var stylesheets = mainBorderPane.getScene().getStylesheets();
         stylesheets.clear();
+
         if (isDarkMode) {
             stylesheets.add(getClass().getResource("/css/dark-theme.css").toExternalForm());
             themeButton.setText(resources.getString("theme.light"));
@@ -391,20 +393,25 @@ public class MainController {
         }
     }
 
-
-
     @FXML
     public void handleSignOutAction() {
         try {
+            if (animationTimeline != null) animationTimeline.stop();
+
+            if (visualCanvas != null) {
+                visualCanvas.getGraphicsContext2D().clearRect(0, 0, visualCanvas.getWidth(), visualCanvas.getHeight());
+            }
+
             bootstrapper.getClientSession().removeUser();
             notificationListener.stopListening();
-            if (runnerLoginController != null) runnerLoginController.loadLoginView();
-        } catch (Exception e) {
-            printErrorToConsole("No fue posible cerrar la sesión.");
+
+            if (runnerLoginController != null) {
+                runnerLoginController.loadLoginView();
+            }
+        } catch (Exception ignored) {
+            // Silencio absoluto para la consola de Helios
         }
     }
-
-
 
     @FXML
     public void handleExitAction() {
@@ -412,19 +419,18 @@ public class MainController {
         System.exit(0);
     }
 
-
-
     public void updateTableView(List<Worker> listFromServer) {
         ObservableList<Worker> observableList = FXCollections.observableList(listFromServer);
         workersTable.setItems(observableList);
         Platform.runLater(this::drawObjects);
     }
 
-
-
     public void drawObjects() {
         if (visualCanvas == null) return;
-        if (animationTimeline != null) animationTimeline.stop();
+
+        if (animationTimeline != null) {
+            animationTimeline.stop();
+        }
 
         animationTimeline = new Timeline(
                 new KeyFrame(Duration.ZERO, new KeyValue(animationProgress, 0)),
@@ -433,12 +439,17 @@ public class MainController {
         animationTimeline.play();
     }
 
-
-
     private void renderCanvasFrame() {
         if (visualCanvas == null) return;
 
-        if (bootstrapper == null || bootstrapper.getClientSession().getUserName() == null) {
+        var session = (bootstrapper != null) ? bootstrapper.getClientSession() : null;
+        if (session == null || session.getUserName() == null) {
+            return; // Salida limpia. No hay sesión, no hay nada que dibujar.
+        }
+
+        if (bootstrapper == null ||
+                bootstrapper.getClientSession() == null ||
+                bootstrapper.getClientSession().getUserName() == null) {
             return;
         }
 
@@ -449,7 +460,6 @@ public class MainController {
         double centerX = width / 2;
         double centerY = height / 2;
 
-
         gc.clearRect(0, 0, width, height);
 
         gc.save();
@@ -458,21 +468,24 @@ public class MainController {
 
         double gridSize = 40.0;
 
-
-        for (double x = centerX; x < width; x += gridSize) gc.strokeLine(x, 0, x, height);
-        for (double x = centerX; x > 0; x -= gridSize) gc.strokeLine(x, 0, x, height);
-
-
-        for (double y = centerY; y < height; y += gridSize) gc.strokeLine(0, y, width, y);
-        for (double y = centerY; y > 0; y -= gridSize) gc.strokeLine(0, y, width, y);
+        for (double x = centerX; x < width; x += gridSize) {
+            gc.strokeLine(x, 0, x, height);
+        }
+        for (double x = centerX; x > 0; x -= gridSize) {
+            gc.strokeLine(x, 0, x, height);
+        }
+        for (double y = centerY; y < height; y += gridSize) {
+            gc.strokeLine(0, y, width, y);
+        }
+        for (double y = centerY; y > 0; y -= gridSize) {
+            gc.strokeLine(0, y, width, y);
+        }
         gc.restore();
-
 
         gc.setStroke(Color.web("#252538"));
         gc.setLineWidth(1.5);
         gc.strokeLine(0, centerY, width, centerY);
         gc.strokeLine(centerX, 0, centerX, height);
-
 
         double maxX = 1, maxY = 1;
         for (Worker w : workersTable.getItems()) {
@@ -519,13 +532,19 @@ public class MainController {
 
     private void setupCanvasInteractions() {
         if (visualCanvas == null) return;
+
         ContextMenu canvasContextMenu = new ContextMenu();
-        MenuItem infoItem = new MenuItem(), updateItem = new MenuItem(), deleteItem = new MenuItem();
+        MenuItem infoItem = new MenuItem();
+        MenuItem updateItem = new MenuItem();
+        MenuItem deleteItem = new MenuItem();
+
         canvasContextMenu.getItems().addAll(infoItem, updateItem, deleteItem);
 
         visualCanvas.setOnMouseClicked(event -> {
             canvasContextMenu.hide();
-            double mouseX = event.getX(), mouseY = event.getY();
+
+            double mouseX = event.getX();
+            double mouseY = event.getY();
             double centerX = Math.max(100, visualCanvas.getWidth()) / 2;
             double centerY = Math.max(100, visualCanvas.getHeight()) / 2;
 
@@ -556,18 +575,22 @@ public class MainController {
 
             clickedWorker.ifPresent(worker -> {
                 if (event.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
-                    if (event.getClickCount() == 1) showWorkerDetailsDialog(worker);
-                    else if (event.getClickCount() == 2) {
-                        workersTable.getSelectionModel().select(worker); handleUpdateAction();
+                    if (event.getClickCount() == 1) {
+                        showWorkerDetailsDialog(worker);
+                    } else if (event.getClickCount() == 2) {
+                        workersTable.getSelectionModel().select(worker);
+                        handleUpdateAction();
                     }
                 } else if (event.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
                     infoItem.setText(resources.getString("menu.info"));
                     updateItem.setText(resources.getString("menu.update"));
                     deleteItem.setText(resources.getString("menu.delete"));
+
                     infoItem.setOnAction(e -> {
                         showWorkerDetailsDialog(worker);
                         commandHistory.addCommand("menu.info");
                     });
+
                     updateItem.setOnAction(e -> {
                         workersTable.getSelectionModel().select(worker);
                         handleUpdateAction();
@@ -581,48 +604,62 @@ public class MainController {
         });
     }
 
-
-
     private void setBoxComboOptions() {
         languageCombox.getItems().clear();
         languageCombox.getItems().addAll("Español (Colombia)", "Ruso");
         languageCombox.setValue("Español (Colombia)");
+
         languageCombox.setOnAction(action -> {
-            if (languageCombox.getValue() != null) changeLanguage(languageCombox.getValue());
+            if (languageCombox.getValue() != null) {
+                changeLanguage(languageCombox.getValue());
+            }
         });
     }
 
-
-
     private void changeLanguage(String language) {
-        Locale locale = new Locale(mapLanguages.get(language), mapLocation.get(mapLanguages.get(language)));
+        String languageChoosed = mapLanguages.get(language);
+        String locationLanguage = mapLocation.get(languageChoosed);
+        Locale locale = new Locale(languageChoosed, locationLanguage);
+
         this.resources = ResourceBundle.getBundle("client.i18n.Messages", locale);
+        currentZone = mapTimeZones.getOrDefault(languageChoosed, ZoneId.systemDefault());
+
         updateTextInterface();
         closeSidePanel();
         workersTable.refresh();
     }
 
-
-
     private void setupContextMenu() {
         workersTable.setRowFactory(tv -> {
             TableRow<Worker> tableRow = new TableRow<>();
             ContextMenu contextMenu = new ContextMenu();
+
             MenuItem infoItem = new MenuItem(resources.getString("menu.info"));
             MenuItem updateItem = new MenuItem(resources.getString("menu.update"));
             MenuItem deleteItem = new MenuItem(resources.getString("menu.delete"));
 
-            infoItem.setOnAction(event -> { showWorkerDetailsDialog(tableRow.getItem()); commandHistory.addCommand("menu.info"); });
-            updateItem.setOnAction(event -> { workersTable.getSelectionModel().select(tableRow.getItem()); handleUpdateAction(); });
+            infoItem.setOnAction(event -> {
+                showWorkerDetailsDialog(tableRow.getItem());
+                commandHistory.addCommand("menu.info");
+            });
+
+            updateItem.setOnAction(event -> {
+                workersTable.getSelectionModel().select(tableRow.getItem());
+                handleUpdateAction();
+            });
+
             deleteItem.setOnAction(event -> confirmAndRemoveWorker(tableRow.getItem()));
 
             contextMenu.getItems().addAll(infoItem, updateItem, deleteItem);
-            tableRow.contextMenuProperty().bind(javafx.beans.binding.Bindings.when(tableRow.emptyProperty()).then((ContextMenu) null).otherwise(contextMenu));
+
+            tableRow.contextMenuProperty().bind(
+                    javafx.beans.binding.Bindings.when(tableRow.emptyProperty())
+                            .then((ContextMenu) null)
+                            .otherwise(contextMenu)
+            );
             return tableRow;
         });
     }
-
-
 
     private void confirmAndRemoveWorker(Worker worker) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -632,24 +669,26 @@ public class MainController {
         alert.setGraphic(null);
         alert.getDialogPane().setGraphic(null);
 
-        try {
-            alert.getDialogPane().getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
-            alert.getDialogPane().getStyleClass().add("form-panel");
-        } catch (Exception ignored) {}
+        styleAndTranslateDialog(alert);
 
         alert.showAndWait().ifPresent(result -> {
             if (result == ButtonType.OK) {
                 try {
                     Result<Boolean> response = bootstrapper.getProxyWorkerRepository().removeById(worker.getId());
-                    if (!response.isSuccess()) { printNetworkError(response.getErrorMessage()); return; }
+
+                    if (!response.isSuccess()) {
+                        printNetworkError(response.getErrorMessage());
+                        return;
+                    }
+
                     printToConsole(resources.getString("console.remove.success"));
                     commandHistory.addCommand("cmd.remove_by_id");
-                } catch (Exception e) { printErrorToConsole(e.getMessage()); }
+                } catch (Exception e) {
+                    printErrorToConsole(e.getMessage());
+                }
             }
         });
     }
-
-
 
     private void showWorkerDetailsDialog(Worker worker) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -662,34 +701,42 @@ public class MainController {
         NumberFormat numberFormat = NumberFormat.getNumberInstance(resources.getLocale());
         DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).localizedBy(resources.getLocale());
 
-        String details = String.format(resources.getString("dialog.info.details"),
-                worker.getId(), worker.getCreatorName(),
-                numberFormat.format(worker.getCoordinates().getX()), numberFormat.format(worker.getCoordinates().getY()),
-                numberFormat.format(worker.getSalary()), worker.getPosition(), worker.getStatus(),
-                worker.getOrganization().getFullName(), numberFormat.format(worker.getOrganization().getAnnualTurnover()),
-                numberFormat.format(worker.getOrganization().getEmployeesCount()), worker.getCreationDate().format(formatter)
+        String details = String.format(
+                resources.getString("dialog.info.details"),
+                worker.getId(),
+                worker.getCreatorName(),
+                numberFormat.format(worker.getCoordinates().getX()),
+                numberFormat.format(worker.getCoordinates().getY()),
+                numberFormat.format(worker.getSalary()),
+                worker.getPosition(),
+                worker.getStatus(),
+                worker.getOrganization().getFullName(),
+                numberFormat.format(worker.getOrganization().getAnnualTurnover()),
+                numberFormat.format(worker.getOrganization().getEmployeesCount()),
+                worker.getCreationDate().format(formatter)
         );
 
         alert.setContentText(details);
-        try {
-            alert.getDialogPane().getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
-            alert.getDialogPane().getStyleClass().add("form-panel");
-        } catch (Exception ignored) {}
 
+        styleAndTranslateDialog(alert);
         alert.showAndWait();
     }
 
-
-
     public void printToConsole(String message) {
         if (message == null || message.trim().isEmpty()) return;
-        String timeStamp = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+
+        String pattern = resources.containsKey("console.time_format") ? resources.getString("console.time_format") : "HH:mm:ss";
+        String timeStamp = LocalTime.now(currentZone).format(DateTimeFormatter.ofPattern(pattern));
+
         consoleOutput.appendText("[" + timeStamp + "] " + message.trim() + "\n");
     }
 
     public void printErrorToConsole(String message) {
         if (message == null || message.trim().isEmpty()) return;
-        String timeStamp = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+
+        String pattern = resources.containsKey("console.time_format") ? resources.getString("console.time_format") : "HH:mm:ss";
+        String timeStamp = LocalTime.now(currentZone).format(DateTimeFormatter.ofPattern(pattern));
+
         consoleOutput.appendText("[" + timeStamp + "]  ERROR: " + message.trim() + "\n");
     }
 
@@ -702,8 +749,6 @@ public class MainController {
         }
     }
 
-
-
     private Color getColorForUser(String username) {
         return userColors.computeIfAbsent(username, k -> {
             int hash = Math.abs(k.hashCode());
@@ -711,10 +756,9 @@ public class MainController {
         });
     }
 
-
-
     public void updateTextInterface() {
         if (resources == null) return;
+
         addButton.setText(resources.getString("button.add"));
         clearButton.setText(resources.getString("button.clear"));
         updateButton.setText(resources.getString("button.update"));
@@ -747,9 +791,11 @@ public class MainController {
         if (welcomeLabel != null && bootstrapper != null) {
             welcomeLabel.setText(String.format(resources.getString("label.welcome"), bootstrapper.getClientSession().getUserName()));
         }
+
         if (themeButton != null) {
             themeButton.setText(isDarkMode ? resources.getString("theme.light") : resources.getString("theme.dark"));
         }
+
         if (consoleTitledPane != null) {
             consoleTitledPane.setText(resources.getString("title.console"));
         }
@@ -758,20 +804,44 @@ public class MainController {
     public void closeSidePanel() {
         mainBorderPane.setRight(null);
     }
+
     public void setNotificationListener(NotificationListener notificationListener) {
         this.notificationListener = notificationListener;
     }
+
     public void setRunnerLoginController(RunnerLoginController runnerLoginController) {
         this.runnerLoginController = runnerLoginController;
     }
+
     public void setBootstrapper(SystemBootstrapper systemBootstrapper) {
         this.bootstrapper = systemBootstrapper;
     }
+
     public SystemBootstrapper gerSystemBootstrapper() {
         if (bootstrapper != null) return bootstrapper;
         throw new IllegalArgumentException("Error, SystemBootstrapper no ha sido inicializado");
     }
+
     public ResourceBundle getResources() {
         return resources;
+    }
+
+    private void styleAndTranslateDialog(javafx.scene.control.Dialog<?> dialog) {
+        try {
+            dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
+            dialog.getDialogPane().getStyleClass().add("form-panel");
+        } catch (Exception ignored) {
+            // Silenciado para evitar ensuciar la terminal SSH en Helios
+        }
+
+        javafx.scene.control.Button okButton = (javafx.scene.control.Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
+        if (okButton != null) {
+            okButton.setText(resources.containsKey("button.ok") ? resources.getString("button.ok") : "OK");
+        }
+
+        javafx.scene.control.Button cancelButton = (javafx.scene.control.Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL);
+        if (cancelButton != null) {
+            cancelButton.setText(resources.containsKey("form.cancel") ? resources.getString("form.cancel") : "Cancel");
+        }
     }
 }

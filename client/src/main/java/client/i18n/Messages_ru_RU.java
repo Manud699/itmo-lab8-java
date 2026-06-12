@@ -28,6 +28,8 @@ public class Messages_ru_RU extends ListResourceBundle {
                 { "checkbox.showPassword",    "Показать пароль" },
                 { "label.welcome",            "Добро пожаловать, %s" },
                 { "label.requiredFields", "* - обязательные поля" },
+                { "label.username_prompt",    "Введите имя пользователя." },
+                { "label.password_prompt",    "Введите пароль." },
 
                 // ==========================================
                 // 3. BOTONES Y MENÚS PRINCIPALES
@@ -40,6 +42,7 @@ public class Messages_ru_RU extends ListResourceBundle {
                 { "button.view",              "Вид ▾" },
                 { "button.delete",            "Удалить ▾" },
                 { "button.head",              "Показать первый" },
+                { "button.ok", "ОК" },
 
                 { "menuItem.printSalary",     "Показать зарплаты" },
                 { "menuItem.head",            "Показать первый" },
@@ -115,6 +118,7 @@ public class Messages_ru_RU extends ListResourceBundle {
                 { "console.history.empty",    "История пуста. Вы еще не выполняли команд." },
                 { "console.removeHead.success","ВЫПОЛНЕНИЕ REMOVE_HEAD...\n   [!] ЭЛЕМЕНТ ИЗВЛЕЧЕН И УДАЛЕН:\n       > ID: %s | Имя: %s\n       > Должность: %s | Зарплата: %s\n       > Организация: %s" },
                 { "console.removeHead.empty", "Операция removeHead не удалась: коллекция пуста." },
+                { "console.time_format",      "HH:mm:ss" },
 
                 // ==========================================
                 // 8. COMANDOS
@@ -164,7 +168,21 @@ public class Messages_ru_RU extends ListResourceBundle {
                 // ==========================================
                 { "error.db.permission_denied","Доступ запрещен: элемент вам не принадлежит." },
                 { "error.db.not_found",       "Элементы по данному критерию не найдены." },
-                { "error.db.server_error",    "Ошибка сервера базы данных. Попробуйте позже." }
+                { "error.db.server_error",    "Ошибка сервера базы данных. Попробуйте позже." },
+
+                // Ruso
+                { "error.user.name.empty",     "Имя пользователя не может быть пустым." },
+                { "error.user.name.short",     "Имя должно содержать не менее 2 символов." },
+                { "error.user.password.empty", "Пароль обязателен." },
+                { "error.user.password.short", "Пароль должен содержаar не менее 8 символов." },
+                { "error.user.password.regex", "Недостаточная безопасность: используйте заглавную, строчную буквы, цифру и символ." },
+
+                // SECCIÓN DE ALERTAS Y LOGIN
+                { "dialog.error.title",   "Ошибка" },
+                { "dialog.success.title", "Успех" },
+                { "login.success",        "Вход выполнен успешно." },
+                { "register.success",     "Регистрация прошла успешно." },
+                { "error.unexpected",     "Произошла непредвиденная ошибка. Попробуйте еще раз." },
         };
     }
 }

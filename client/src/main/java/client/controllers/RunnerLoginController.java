@@ -37,7 +37,6 @@ public class RunnerLoginController {
 
 
             LoginController controller = loader.getController();
-            controller.initialize();
             controller.setSystemBootstrapper(systemBootstrapper);
             runnerMainController.setRunnerLogin(this);
             controller.setRunnerMainController(runnerMainController);

@@ -14,8 +14,8 @@ public class ClientSession {
         return user;
     }
 
-    public String getUserName(){
-        return user.name();
+    public String getUserName() {
+        return (user != null) ? user.name() : null;
     }
 
     public void removeUser(){

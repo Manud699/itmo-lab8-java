@@ -28,6 +28,8 @@ public class Messages_es_CO extends ListResourceBundle {
                 { "checkbox.showPassword",    "Mostrar contraseña" },
                 { "label.welcome",            "Bienvenido, %s" },
                 { "label.requiredFields", "* - campos obligatorios" },
+                { "label.username_prompt",    "Ingrese su nombre de usuario..." },
+                { "label.password_prompt",    "Ingrese su contraseña." },
 
 
                 // 3. BOTONES Y MENÚS PRINCIPALES
@@ -40,6 +42,7 @@ public class Messages_es_CO extends ListResourceBundle {
                 { "button.view",              "Ver ▾" },
                 { "button.delete",            "Eliminar ▾" },
                 { "button.head",              "Ver primero" },
+                { "button.ok", "Aceptar" },
 
                 { "menuItem.printSalary",     "Ver salarios" },
                 { "menuItem.head",            "Ver primero" },
@@ -110,6 +113,7 @@ public class Messages_es_CO extends ListResourceBundle {
                 { "console.salary.empty",     "No hay salarios para mostrar." },
                 { "console.sum.header",       "CÁLCULO DE NÓMINA (SUMA TOTAL DE SALARIOS):" },
                 { "console.sum.total",        "Total" },
+                { "console.time_format",      "HH:mm:ss" },
 
                 { "console.history.header",   "HISTORIAL DE COMANDOS (Últimos 11):" },
                 { "console.history.empty",    "El historial está vacío. Aún no has ejecutado comandos." },
@@ -163,7 +167,22 @@ public class Messages_es_CO extends ListResourceBundle {
 
                 { "error.db.permission_denied","Acceso denegado: El elemento no te pertenece." },
                 { "error.db.not_found",       "No se encontraron elementos con ese criterio para eliminar." },
-                { "error.db.server_error",    "Error en el servidor de base de datos. Intente más tarde." }
+                { "error.db.server_error",    "Error en el servidor de base de datos. Intente más tarde." },
+
+                // 12. VALIDACIÓN DE USUARIO (Record User)
+                { "error.user.name.empty",     "El nombre de usuario no puede estar vacío." },
+                { "error.user.name.short",     "El nombre debe tener al menos 2 caracteres." },
+                { "error.user.password.empty", "La contraseña es obligatoria." },
+                { "error.user.password.short", "La contraseña debe tener al menos 8 caracteres." },
+                { "error.user.password.regex", "Seguridad insuficiente: Use mayúscula, minúscula, número y símbolo (@$!%*?&)." },
+
+                { "dialog.error.title",   "Error" },
+                { "dialog.success.title", "Éxito" },
+                { "login.success",        "Sesión iniciada correctamente." },
+                { "register.success",     "Registro exitoso." },
+                { "error.unexpected",     "Ocurrió un error inesperado. Inténtalo de nuevo." },
+
+
         };
     }
 }
