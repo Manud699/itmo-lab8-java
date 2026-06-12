@@ -33,10 +33,16 @@ public class LoginController {
     private final Map<String, String> mapLocation = new HashMap<>();
 
     public void initialize() {
+        // Inicialización completa de los mapas
         mapLanguages.put("Ruso", "ru");
         mapLanguages.put("Español (Colombia)", "es");
+        mapLanguages.put("Polaco", "pl");
+        mapLanguages.put("Noruego", "no");
+
         mapLocation.put("ru", "RU");
         mapLocation.put("es", "CO");
+        mapLocation.put("pl", "PL");
+        mapLocation.put("no", "NO");
 
         passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());
         passwordTextField.setVisible(false);
@@ -69,23 +75,28 @@ public class LoginController {
     }
 
     private void changeLanguage(String language) {
-        String languageChoosed = mapLanguages.get(language);
-        String locationLanguage = mapLocation.get(languageChoosed);
-        Locale locale = new Locale(languageChoosed, locationLanguage);
+        String langCode = mapLanguages.get(language);
+        String locCode = mapLocation.get(langCode);
+
+        Locale locale = new Locale(langCode, locCode);
         this.resources = ResourceBundle.getBundle("client.i18n.Messages", locale);
         updateTextInterface();
     }
 
     private void setBoxComboOptions() {
-        languageCombox.getItems().addAll("Español (Colombia)", "Ruso");
+        languageCombox.getItems().addAll("Español (Colombia)", "Ruso", "Polaco", "Noruego");
         languageCombox.setValue("Español (Colombia)");
+
         languageCombox.setOnAction(action -> {
-            if (languageCombox.getValue() != null) changeLanguage(languageCombox.getValue());
+            if (languageCombox.getValue() != null) {
+                changeLanguage(languageCombox.getValue());
+            }
         });
     }
 
     private void updateTextInterface() {
         if (resources == null) return;
+
         loginButton.setText(resources.getString("button.login"));
         registerButton.setText(resources.getString("button.register"));
         passwordLabel.setText(resources.getString("label.password"));
@@ -134,6 +145,7 @@ public class LoginController {
                 runnerMainController.loadMainView();
             }
         } catch (IllegalArgumentException e) {
+            // El mensaje de la excepción es la clave de I18n configurada en la clase User
             showMessage(e.getMessage(), Color.RED);
         } catch (Exception e) {
             showMessage("error.unexpected", Color.RED);

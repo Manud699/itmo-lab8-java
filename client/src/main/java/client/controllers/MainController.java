@@ -103,6 +103,8 @@ public class MainController {
 
         mapLocation.put("ru", "RU");
         mapLocation.put("es", "CO");
+        mapLocation.put("pl", "PL");
+        mapLocation.put("no", "NO");
 
         mapTimeZones.put("ru", ZoneId.of("Europe/Moscow"));
         mapTimeZones.put("es", ZoneId.of("America/Bogota"));
@@ -606,7 +608,7 @@ public class MainController {
 
     private void setBoxComboOptions() {
         languageCombox.getItems().clear();
-        languageCombox.getItems().addAll("Español (Colombia)", "Ruso");
+        languageCombox.getItems().addAll("Español (Colombia)", "Ruso", "Polaco", "Noruego");
         languageCombox.setValue("Español (Colombia)");
 
         languageCombox.setOnAction(action -> {
